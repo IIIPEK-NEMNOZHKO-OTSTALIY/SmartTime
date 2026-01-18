@@ -139,13 +139,34 @@ class _HomePageState extends State<HomePage> {
   }
   void addTaskDialog() {
     final controllerTitleText = TextEditingController();
+    final controllerDurationText = TextEditingController();
+    final controllerPriorityText = TextEditingController();
     showDialog(
         context: context,
         builder: (_) => AlertDialog(
           title: Text('Новая задача'),
-          content: TextField(
-            controller: controllerTitleText,
-            decoration: InputDecoration(hintText: 'Название'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: [
+                Text('Название задачи'),
+                TextField(
+                  controller: controllerTitleText,
+                  decoration: InputDecoration(hintText: 'Название'),
+                ),
+                SizedBox(height: 20),
+                Text('Длительность задачи'),
+                TextField(
+                  controller: controllerDurationText,
+                  decoration: InputDecoration(hintText: 'Название'),
+                ),
+                SizedBox(height: 20),
+                Text('Приоритет задачи'),
+                TextField(
+                  controller: controllerPriorityText,
+                  decoration: InputDecoration(hintText: 'Название'),
+                ),
+              ],
+            )
           ),
           actions: [
             TextButton(

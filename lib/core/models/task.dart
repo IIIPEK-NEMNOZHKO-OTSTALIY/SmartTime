@@ -3,8 +3,8 @@ class Task {
   final String title;
   bool isDone;
   DateTime? dueTime;
-  int duration;
-  int priority;
+  final int duration;
+  final int priority;
 
   Task({
     required this.id,
@@ -19,9 +19,9 @@ class Task {
     return Task(
       id: json['id'],
       title: json['title'],
-      isDone: json['isDone'],
-      duration: json['duration'],
-      priority: json['priority'],
+      isDone: json['isDone'] ?? false,
+      duration: json['duration'] ?? 0,
+      priority: json['priority'] ?? 0,
       dueTime: json['dueTime'] != null
         ? DateTime.parse(json['dueTime'])
         : null,
@@ -43,6 +43,7 @@ class Task {
     bool? isDone,
     int? duration,
     int? priority,
+
   }) {
     return Task(
       id: id ?? this.id,

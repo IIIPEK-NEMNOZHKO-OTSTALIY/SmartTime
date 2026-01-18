@@ -1,0 +1,25 @@
+{
+  "spaces" : [
+    {
+      "space_title": "first space",
+      "space_id" : "1",
+      "tasks" : [
+        {
+          "title": "Сделать проект",
+          "id": "1",
+          "isDone": false
+        },
+        {
+          "title": "Поесть",
+          "id": "2",
+          "isDone": false
+        },
+        {
+          "title": "а",
+          "id": "3",
+          "isDone": true
+        }
+      ]
+    }
+  ]
+}

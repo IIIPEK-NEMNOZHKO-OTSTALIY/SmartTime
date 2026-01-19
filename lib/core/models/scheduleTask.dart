@@ -2,12 +2,12 @@ import 'task.dart';
 
 class ScheduleItem {
   final Task task;
-  final DateTime start;
-  final DateTime end;
+  final DateTime startTime;
+  final DateTime endTime;
 
   ScheduleItem({
     required this.task,
-    required this.start,
-    required this.end,
+    required this.startTime,
+    required this.endTime,
   });
 }

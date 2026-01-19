@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:smarttime2/features/schedule/schedule_page.dart';
 import 'home_controller.dart';
 
 class HomePage extends StatefulWidget {
@@ -55,7 +57,13 @@ class _HomePageState extends State<HomePage> {
         ? buildSpaces()
         : buildTasks(),
       floatingActionButton: _controller.mode == HomeMode.tasks
-      ? FloatingActionButton(onPressed: () => addTaskDialog(), child: Icon(Icons.add),)
+      ? Row(children: <Widget>[
+        FloatingActionButton(onPressed: () => addTaskDialog(), child: Icon(Icons.add),), SizedBox(width: 10),
+        FloatingActionButton(onPressed: _controller.currentSpace == null
+          ? null
+          : () => Navigator.push(context, MaterialPageRoute(builder: (context) => SchedulePage(space: _controller.currentSpace!))), child: Icon(Icons.calendar_today_outlined),)
+      ],
+      mainAxisAlignment: MainAxisAlignment.center,)
       : FloatingActionButton(onPressed: () => addSpaceDialog(), child: Icon(Icons.add)),
     );
   }
@@ -79,7 +87,6 @@ class _HomePageState extends State<HomePage> {
       }
     );
   }
-
   Widget buildTasks() {
     final tasks = _controller.currentSpace!.tasks;
     return Column(
@@ -93,7 +100,10 @@ class _HomePageState extends State<HomePage> {
             itemBuilder: (_, index) {
               final task = tasks[index];
               return ListTile(
-                title: Text(task.title),
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [Text(task.title, style: TextStyle(fontSize: 20),), Row( children: [ Text('Длительность: ${task.duration.toString()} '), Text(' Приоритет: ${task.priority.toString()}')])],
+                ),
                 trailing: Icon(task.isDone ? Icons.check_circle : Icons.circle_outlined),
                 onTap: () {
                   _controller.toggleTask(task.id);
@@ -139,8 +149,8 @@ class _HomePageState extends State<HomePage> {
   }
   void addTaskDialog() {
     final controllerTitleText = TextEditingController();
-    final controllerDurationText = TextEditingController();
-    final controllerPriorityText = TextEditingController();
+    final controllerDurationText = TextEditingController(text: "60");
+    final controllerPriorityText = TextEditingController(text: "3");
     showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -156,6 +166,8 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(height: 20),
                 Text('Длительность задачи'),
                 TextField(
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                   controller: controllerDurationText,
                   decoration: InputDecoration(hintText: 'Название'),
                 ),
@@ -175,7 +187,7 @@ class _HomePageState extends State<HomePage> {
             ),
             ElevatedButton(
                 onPressed: () {
-                  _controller.addTask(controllerTitleText.text);
+                  _controller.addTask(controllerTitleText.text, int.parse(controllerDurationText.text), int.parse(controllerPriorityText.text),);
                   Navigator.pop(context);
                   setState(() {});
                 },

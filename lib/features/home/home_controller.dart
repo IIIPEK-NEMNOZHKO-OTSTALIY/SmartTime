@@ -54,9 +54,11 @@ class HomeController {
     lss.saveSpaces(spaces);
   }
 
-  void addTask(String title) {
+  void addTask(String title, int duration, int priority) {
     final newTask = Task(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
+      duration: duration,
+      priority: priority,
       title: title,
     );
     currentSpace!.tasks.add(newTask);

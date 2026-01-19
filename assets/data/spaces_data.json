@@ -8,17 +8,29 @@
           "title": "Сделать проект",
           "id": "1",
           "isDone": false,
-          "priority": "1"
+          "priority": "1",
+          "duration": "300"
         },
         {
           "title": "Поесть",
           "id": "2",
-          "isDone": false
+          "isDone": false,
+          "priority": "3",
+          "duration": "20"
         },
         {
-          "title": "а",
+          "title": "Решить ЕГЭ по Профмату",
           "id": "3",
-          "isDone": true
+          "isDone": false,
+          "priority": "2",
+          "duration": "240"
+        },
+        {
+          "title": "Посмотреть сериал",
+          "id": "4",
+          "isDone": true,
+          "priority": "3",
+          "duration": "60"
         }
       ]
     }

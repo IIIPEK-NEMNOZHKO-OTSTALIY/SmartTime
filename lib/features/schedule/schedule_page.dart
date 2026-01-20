@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:smarttime2/features/home/home_page.dart';
 import 'schedule_controller.dart';
 import '../../core/models/space.dart';
 
@@ -25,33 +24,43 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   Widget build(BuildContext context) {
+    final dayTile = _controller.timeline.firstWhere((t)=>
+          t.day.day==_controller.selectedDay.day &&
+          t.day.month==_controller.selectedDay.month &&
+          t.day.year == _controller.selectedDay.year);
     return Scaffold(
         body: Center(
           child: Column(
               children: [
-                SizedBox(height: 50,),
+                SizedBox(height: 200,),
                 Text('РАСПИСАНИЕ', style: TextStyle(fontSize: 32),),
+                Text('На ${_controller.selectedDay.day}.${_controller.selectedDay.month}.${_controller.selectedDay.year} '),
                 Expanded(child: ListView.builder(
-                    itemCount: _controller.timeline.length,
+                    itemCount: dayTile.tasks.length,
                     itemBuilder: (_, index) {
-                      final task = _controller.timeline[index];
+                      final task = dayTile.tasks[index];
                       return ListTile(
                         title: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(task.task.title, style: TextStyle(fontSize: 20),),
-                            Text('${_controller.formatTime(task.startTime)} - ${_controller.formatTime(task.endTime)} (${task.task.duration
+                            Text(task.taskTitle, style: TextStyle(fontSize: 20),),
+                            Text('${_controller.formatTime(task.startTime)} - ${_controller.formatTime(task.endTime)} (${task.duration
                                 .toString()} минут) '),
                           ],
                         ),
-                        trailing: Icon(task.task.isDone ? Icons.check_circle : Icons
+                        trailing: Icon(task.isDone ? Icons.check_circle : Icons
                             .circle_outlined),
                         onTap: () {
                           setState(() {});
                         },
                       );
                     }
-                ),)
+                ),),
+                Expanded(child: ListView.builder(itemCount: 7, itemBuilder: (_, index) {
+                  return ListTile(
+
+                  );
+                }, scrollDirection: Axis.horizontal,))
               ]
           ),
         ),

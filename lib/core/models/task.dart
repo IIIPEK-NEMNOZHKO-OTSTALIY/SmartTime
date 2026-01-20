@@ -3,12 +3,14 @@ class Task {
   final String title;
   bool isDone;
   DateTime? dueTime;
+  DateTime? deadLine;
   final int duration;
   final int priority;
 
   Task({
     required this.id,
     required this.title,
+    this.deadLine,
     this.isDone = false,
     this.dueTime,
     this.duration = 60,

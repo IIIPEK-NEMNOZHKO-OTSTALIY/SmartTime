@@ -8,14 +8,14 @@ import '../../core/models/task.dart';
 class ScheduleController {
   final Space currentSpace;
   final isLoading = false;
-  DateTime weekStart;
-  DateTime selectedDay;
+  late DateTime weekStart;
+  late DateTime selectedDay;
 
-  List<DateTime> getCurrentWeekdays() {
-    return List.generate(7, (i) => weekStart.add(Duration(days: i)));
-  }
-  init () {
-
+  ScheduleController ({
+    required this.currentSpace,
+  }) {
+    selectedDay = DateTime.now();
+    weekStart = getWeekStart(selectedDay);
   }
 
   String formatTime(DateTime time) {
@@ -27,11 +27,7 @@ class ScheduleController {
   List<ScheduleTile> timeline = [];
   List<Task> scheduledTasks = [];
 
-  ScheduleController ({
-    required this.currentSpace,
-    DateTime selectedDay = DateTime.now(),
-    DateTime weekStart = getWeekStart(DateTime.now()),
-  });
+
 
   generateSchedule() {
     timeline.clear();
@@ -48,7 +44,7 @@ class ScheduleController {
 
     for (final task in scheduledTasks) {
       final start = currentTime;
-      final end = start.add(Duration(minutes: task.duration));
+      final end = start.add(Duration(minutes: int.parse(task.duration)));
 
       if (end.isAfter(eveningTime)) {
         currentTime = DateTime(
@@ -59,7 +55,7 @@ class ScheduleController {
           0,
         );
       }
-      if (task.duration > 13*60) {
+      if (int.parse(task.duration) > 13*60) {
         break; //пока что скип, позже разбивается на несклько
       }
 
@@ -100,4 +96,20 @@ class ScheduleController {
   DateTime getWeekStart(DateTime date) {
     return date.subtract(Duration(days: date.weekday - 1));
   }
+
+  List<DateTime> getCurrentWeek() {
+    return List.generate(7, (i)=>weekStart.add(Duration(days: 7)));
+  }
+  void selectDay(DateTime day) {
+    selectedDay = day;
+  }
+  void nextWeek() {
+    weekStart = weekStart.add(Duration(days: 7));
+    selectedDay = weekStart;
+  }
+  void previousWeek() {
+    weekStart = weekStart.subtract(Duration(days: 7));
+    selectedDay = weekStart;
+  }
+
 }

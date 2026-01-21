@@ -187,7 +187,7 @@ class _HomePageState extends State<HomePage> {
             ),
             ElevatedButton(
                 onPressed: () {
-                  _controller.addTask(controllerTitleText.text, int.parse(controllerDurationText.text), int.parse(controllerPriorityText.text),);
+                  _controller.addTask(controllerTitleText.text, controllerDurationText.text, controllerPriorityText.text,);
                   Navigator.pop(context);
                   setState(() {});
                 },

@@ -1,8 +1,8 @@
 class ScheduleItem {
   final String taskId;
   final String taskTitle;
-  final int duration;
-  final int priority;
+  final String duration;
+  final String priority;
   final bool isDone;
   DateTime? deadLine;
   final DateTime startTime;

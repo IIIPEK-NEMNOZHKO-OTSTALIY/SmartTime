@@ -4,17 +4,16 @@ class Task {
   bool isDone;
   DateTime? dueTime;
   DateTime? deadLine;
-  final int duration;
-  final int priority;
+  final String duration;
+  final String priority;
 
   Task({
     required this.id,
     required this.title,
-    this.deadLine,
     this.isDone = false,
     this.dueTime,
-    this.duration = 60,
-    this.priority = 3,
+    this.duration = '60',
+    this.priority = '3',
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -22,8 +21,8 @@ class Task {
       id: json['id'],
       title: json['title'],
       isDone: json['isDone'] ?? false,
-      duration: json['duration'] ?? 0,
-      priority: json['priority'] ?? 0,
+      duration: json['duration'] ?? "60",
+      priority: json['priority'] ?? "3",
       dueTime: json['dueTime'] != null
         ? DateTime.parse(json['dueTime'])
         : null,
@@ -43,8 +42,8 @@ class Task {
     String? id,
     String? title,
     bool? isDone,
-    int? duration,
-    int? priority,
+    String? duration,
+    String? priority,
 
   }) {
     return Task(

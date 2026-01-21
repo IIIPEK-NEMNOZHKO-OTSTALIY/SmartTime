@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 //import 'package:flutter/services.dart';
+import 'package:collection/collection.dart';
 import 'schedule_controller.dart';
 import '../../core/models/space.dart';
 
@@ -24,7 +25,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    final dayTile = _controller.timeline.firstWhere((t) =>
+    final dayTile = _controller.timeline.firstWhereOrNull((t) =>
     t.day.day == _controller.selectedDay.day &&
         t.day.month == _controller.selectedDay.month &&
         t.day.year == _controller.selectedDay.year);
@@ -33,33 +34,50 @@ class _SchedulePageState extends State<SchedulePage> {
           child: Column(
               children: [
                 SizedBox(height: 200,),
-                Text('РАСПИСАНИЕ', style: TextStyle(fontSize: 32),),
+                Row( mainAxisAlignment: MainAxisAlignment.center,children: [
+                  OutlinedButton(onPressed: () => {
+                    _controller.previousWeek(),
+                    setState(() {})
+                  }, child: Icon(Icons.chevron_left)),
+                  SizedBox(width: 20,),
+                  Text('РАСПИСАНИЕ', style: TextStyle(fontSize: 32)),
+                  SizedBox(width: 20,),
+                  OutlinedButton(onPressed: () => {
+                    _controller.nextWeek(),
+                    setState(() {})
+                    }, child: Icon(Icons.chevron_right)),
+                ],
+                ),
+                SizedBox(height: 40),
                 buildWeekBar(),
-                Expanded(child: ListView.builder(
-                    itemCount: dayTile.tasks.length,
-                    itemBuilder: (_, index) {
-                      final task = dayTile.tasks[index];
-                      return ListTile(
-                        title: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(task.taskTitle, style: TextStyle(
-                                fontSize: 20),),
-                            Text('${_controller.formatTime(
-                                task.startTime)} - ${_controller.formatTime(
-                                task.endTime)} (${task.duration
-                                .toString()} минут) '),
-                          ],
-                        ),
-                        trailing: Icon(task.isDone ? Icons.check_circle : Icons
-                            .circle_outlined),
-                        onTap: () {
-                          setState(() {});
-                        },
-                      );
-                    }
-                ),),
-              ]
+                Expanded(
+                child: dayTile == null
+                    ? Text('На этот день задач нет!', style: TextStyle(fontSize: 20),)
+                    : ListView.builder(
+                      itemCount: dayTile.tasks.length,
+                      itemBuilder: (_, index) {
+                        final task = dayTile.tasks[index];
+                        return ListTile(
+                          title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(task.taskTitle, style: TextStyle(
+                                  fontSize: 20),),
+                              Text('${_controller.formatTime(
+                                  task.startTime)} - ${_controller.formatTime(
+                                  task.endTime)} (${task.duration
+                                  .toString()} минут) '),
+                            ],
+                          ),
+                          trailing: Icon(task.isDone ? Icons.check_circle : Icons
+                              .circle_outlined),
+                          onTap: () {
+                            setState(() {});
+                          },
+                        );
+                      })
+                ),
+              ],
           ),
         ),
         floatingActionButton: FloatingActionButton(
@@ -72,15 +90,6 @@ class _SchedulePageState extends State<SchedulePage> {
     final days = _controller.getCurrentWeek();
     return (
         GestureDetector(
-        onHorizontalDragEnd: (details) {
-          if (details.primaryVelocity! < 0) {
-            _controller.nextWeek();
-          }
-          else {
-            _controller.previousWeek();
-          }
-          setState(() {});
-        },
         child: SizedBox(height: 80, child: ListView.builder(
           scrollDirection: Axis.horizontal,
           itemCount: days.length,
@@ -92,6 +101,9 @@ class _SchedulePageState extends State<SchedulePage> {
                 setState(() {});
               },
               child: Container(
+                color: _controller.selectedDay.day == day.day
+                    ? Colors.grey
+                    : null,
                 width: 60,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

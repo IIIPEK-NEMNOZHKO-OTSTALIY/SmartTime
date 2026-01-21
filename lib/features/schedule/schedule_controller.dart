@@ -27,57 +27,74 @@ class ScheduleController {
   List<ScheduleTile> timeline = [];
   List<Task> scheduledTasks = [];
 
-
-
   generateSchedule() {
     timeline.clear();
     final tasks = currentSpace.tasks.where((t) => t.isDone == false).toList();
     scheduledTasks = sortTasks(tasks);
-    DateTime currentTime = DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      DateTime.now().day,
-      9,
+    final now = DateTime.now();
+
+    DateTime currentTime = now.hour >= 22
+        ? DateTime(now.year, now.month, now.day + 1, 9)
+        : DateTime(now.year, now.month, now.day, now.hour + 1, 0);
+
+    DateTime eveningTime = DateTime(
+      currentTime.year,
+      currentTime.month,
+      currentTime.day,
+      22,
       0,
     );
-    DateTime eveningTime = currentTime.add(Duration(hours: 13));
 
     for (final task in scheduledTasks) {
-      final start = currentTime;
-      final end = start.add(Duration(minutes: int.parse(task.duration)));
+      final duration = int.parse(task.duration);
 
-      if (end.isAfter(eveningTime)) {
+      // если задача слишком длинная — пропускаем
+      if (duration > 13 * 60) continue;
+
+      // если не влезает в текущий день — переносим
+      if (currentTime.add(Duration(minutes: duration)).isAfter(eveningTime)) {
         currentTime = DateTime(
-          DateTime.now().year,
-          DateTime.now().month,
+          currentTime.year,
+          currentTime.month,
           currentTime.day + 1,
           9,
           0,
         );
-      }
-      if (int.parse(task.duration) > 13*60) {
-        break; //пока что скип, позже разбивается на несклько
+        eveningTime = DateTime(
+          currentTime.year,
+          currentTime.month,
+          currentTime.day,
+          22,
+          0,
+        );
       }
 
-      ScheduleTile currentDaySchedule = timeline.firstWhere((t) =>
-      t.day.day == currentTime.day && t.day.month == currentTime.month && t.day.year == currentTime.year,
-          orElse: () {
-            var newScheduleTile = ScheduleTile(tasks: [], day: currentTime);
-            timeline.add(newScheduleTile);
-            return newScheduleTile;
-          } );
+      final start = currentTime;
+      final end = start.add(Duration(minutes: duration));
 
-      currentDaySchedule.tasks.add(
-          ScheduleItem(
-            taskId: task.id,
-            isDone: task.isDone,
-            taskTitle: task.title,
-            duration: task.duration,
-            priority: task.priority,
-            startTime: start,
-            endTime: end,
-          )
+      final daySchedule = timeline.firstWhere((t) =>
+            t.day.year == start.year &&
+            t.day.month == start.month &&
+            t.day.day == start.day,
+        orElse: () {
+          final tile = ScheduleTile(day: start, tasks: []);
+          timeline.add(tile);
+          return tile;
+        },
       );
+
+      daySchedule.tasks.add(
+        ScheduleItem(
+          taskId: task.id,
+          taskTitle: task.title,
+          isDone: task.isDone,
+          duration: task.duration,
+          priority: task.priority,
+          startTime: start,
+          endTime: end,
+        ),
+      );
+
       currentTime = end;
     }
   }
@@ -85,7 +102,7 @@ class ScheduleController {
   List<Task> sortTasks(List<Task> tasks) {
     tasks.sort((a, b) {
       if (a.priority != b.priority) {
-        return b.priority.compareTo(a.priority);
+        return a.priority.compareTo(b.priority);
       }
       return a.duration.compareTo(b.duration);
     });
@@ -98,7 +115,7 @@ class ScheduleController {
   }
 
   List<DateTime> getCurrentWeek() {
-    return List.generate(7, (i)=>weekStart.add(Duration(days: 7)));
+    return List.generate(7, (i)=>weekStart.add(Duration(days: i)));
   }
   void selectDay(DateTime day) {
     selectedDay = day;

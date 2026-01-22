@@ -7,12 +7,16 @@ import '../../core/models/task.dart';
 
 class ScheduleController {
   final Space currentSpace;
+  //late List<Space> spaces;
+  //late ScheduleParameters parameters;
   final isLoading = false;
   late DateTime weekStart;
   late DateTime selectedDay;
 
   ScheduleController ({
     required this.currentSpace,
+    //spaces: Lis<Space>,
+    //parameters: ScheduleParameters,
   }) {
     selectedDay = DateTime.now();
     weekStart = getWeekStart(selectedDay);
@@ -48,10 +52,8 @@ class ScheduleController {
     for (final task in scheduledTasks) {
       final duration = int.parse(task.duration);
 
-      // если задача слишком длинная — пропускаем
       if (duration > 13 * 60) continue;
 
-      // если не влезает в текущий день — переносим
       if (currentTime.add(Duration(minutes: duration)).isAfter(eveningTime)) {
         currentTime = DateTime(
           currentTime.year,

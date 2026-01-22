@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'schedule_controller.dart';
 import '../../core/models/space.dart';
+import '../../core/models/schedule_parameters.dart';
 
 class SchedulePage extends StatefulWidget {
-  final Space space;
-  const SchedulePage({Key? key, required this.space}) : super(key: key);
+  final List<Space> spaces;
+  final ScheduleParameters parameters;
+  const SchedulePage({Key? key, required this.spaces, required this.parameters}) : super(key: key);
 
   @override
   State<SchedulePage> createState() => _SchedulePageState();
@@ -18,7 +20,7 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   void initState() {
     super.initState();
-    _controller = ScheduleController(currentSpace: widget.space);
+    _controller = ScheduleController(spaces: widget.spaces, parameters: widget.parameters);
     _controller.generateSchedule();
     setState(() {});
   }
@@ -72,7 +74,7 @@ class _SchedulePageState extends State<SchedulePage> {
                           trailing: Icon(task.isDone ? Icons.check_circle : Icons
                               .circle_outlined),
                           onTap: () {
-                            setState(() {});
+                            setState(() {_controller.toggleTask(task.taskId);});
                           },
                         );
                       })

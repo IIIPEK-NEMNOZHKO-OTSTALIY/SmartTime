@@ -5,7 +5,7 @@ class ScheduleSetupController {
   List<Space> allSpaces = [];
   List<Space> selectedSpaces = [];
 
-  late List<String> selectedSpacesIds = [];
+  List<String> get selectedSpacesIds => selectedSpaces.map((s)=>s.id).toList();
 
   bool isSelected(String spaceId) {
     final space = allSpaces.firstWhere((t)=>t.id == spaceId);

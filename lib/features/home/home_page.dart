@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:smarttime2/features/schedule/schedule_page.dart';
 import 'home_controller.dart';
+import '../schedule/schedule_setup/schedule_setup_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -61,7 +62,7 @@ class _HomePageState extends State<HomePage> {
         FloatingActionButton(onPressed: () => addTaskDialog(), child: Icon(Icons.add),), SizedBox(width: 10),
         FloatingActionButton(onPressed: _controller.currentSpace == null
           ? null
-          : () => Navigator.push(context, MaterialPageRoute(builder: (context) => SchedulePage(space: _controller.currentSpace!))), child: Icon(Icons.calendar_today_outlined),)
+          : () => Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleSetupPage(allSpaces: _controller.spaces!))), child: Icon(Icons.calendar_today_outlined),)
       ],
       mainAxisAlignment: MainAxisAlignment.center,)
       : FloatingActionButton(onPressed: () => addSpaceDialog(), child: Icon(Icons.add)),

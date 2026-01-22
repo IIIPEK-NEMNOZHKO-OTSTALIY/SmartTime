@@ -4,19 +4,22 @@
 import '../../core/models/schedule.dart';
 import '../../core/models/space.dart';
 import '../../core/models/task.dart';
+import '../../core/models/schedule_parameters.dart';
 
 class ScheduleController {
-  final Space currentSpace;
-  //late List<Space> spaces;
+  final List<Space> spaces;
+  final ScheduleParameters parameters;
   //late ScheduleParameters parameters;
   final isLoading = false;
   late DateTime weekStart;
   late DateTime selectedDay;
+  List<ScheduleTile> timeline = [];
+  List<Task> scheduledTasks = [];
 
   ScheduleController ({
-    required this.currentSpace,
+    required this.spaces,
+    required this.parameters
     //spaces: Lis<Space>,
-    //parameters: ScheduleParameters,
   }) {
     selectedDay = DateTime.now();
     weekStart = getWeekStart(selectedDay);
@@ -28,12 +31,15 @@ class ScheduleController {
     return '$h:$m';
   }
 
-  List<ScheduleTile> timeline = [];
-  List<Task> scheduledTasks = [];
+  toggleTask(String taskId) {
+    final task = spaces.expand((space) => space.tasks).firstWhere((s) => s.id == taskId);
+    task.isDone = !task.isDone;
+    generateSchedule();
+  }
 
   generateSchedule() {
     timeline.clear();
-    final tasks = currentSpace.tasks.where((t) => t.isDone == false).toList();
+    final tasks = spaces.expand((space) => space.tasks.where((t) => t.isDone == false)).toList();
     scheduledTasks = sortTasks(tasks);
     final now = DateTime.now();
 
@@ -59,15 +65,15 @@ class ScheduleController {
           currentTime.year,
           currentTime.month,
           currentTime.day + 1,
-          9,
-          0,
+          parameters.dayStartTime~/60,
+          parameters.dayStartTime%60,
         );
         eveningTime = DateTime(
           currentTime.year,
           currentTime.month,
           currentTime.day,
-          22,
-          0,
+          parameters.dayEndTime~/60,
+          parameters.dayEndTime%60,
         );
       }
 
@@ -100,10 +106,9 @@ class ScheduleController {
       currentTime = end;
     }
   }
-
   List<Task> sortTasks(List<Task> tasks) {
     tasks.sort((a, b) {
-      if (a.priority != b.priority) {
+      if ((a.priority != b.priority) && (parameters.priorityMode == PriorityMode.on)) {
         return a.priority.compareTo(b.priority);
       }
       return a.duration.compareTo(b.duration);
@@ -115,7 +120,6 @@ class ScheduleController {
   DateTime getWeekStart(DateTime date) {
     return date.subtract(Duration(days: date.weekday - 1));
   }
-
   List<DateTime> getCurrentWeek() {
     return List.generate(7, (i)=>weekStart.add(Duration(days: i)));
   }

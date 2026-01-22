@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/models/space.dart';
 import '../../../core/models/schedule_parameters.dart';
 import 'schedule_setup_controller.dart';
+import '../schedule_page.dart';
 
 class ScheduleSetupPage extends StatefulWidget {
   final List<Space> allSpaces;
@@ -23,32 +24,37 @@ class _SchedulePageState extends State<ScheduleSetupPage> {
     setState(() {});
   }
 
+  TextEditingController dayStartTimeController = TextEditingController();
+  TextEditingController dayEndTimeController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    int dayStartTime;
-    TextEditingController _dayStartTimeController = TextEditingController();
-    int dayEnsTime;
-    TextEditingController _dayEndtTimeController = TextEditingController();
+
     DensityMode densityMode = DensityMode.balanced;
     PriorityMode priorityMode = PriorityMode.on;
 
     return Scaffold(
       body: Column(
         children: [
-          Text('Время старта рабочего дня (в минутах)', style: TextStyle(fontSize: 20)),
+          SizedBox(height: 100),
+          Text('Укажите необходимые параметры для генерации', style: TextStyle(fontSize: 32)),
           TextField(
             keyboardType: TextInputType.number,
             inputFormatters: <TextInputFormatter>[
               FilteringTextInputFormatter.digitsOnly,
             ],
-            controller: _dayStartTimeController,
+            controller: dayStartTimeController,
+            decoration: InputDecoration(hintText: 'Время начала рабочего дня')
           ),
           SizedBox(height: 20,),
-          Text('Время окончания рабочего дня (в минутах)', style: TextStyle(fontSize: 20),),
-          TextField(),
-
+          TextField( keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+            controller: dayEndTimeController,
+            decoration: InputDecoration(hintText: 'Время окончания рабочего дня')),
           SizedBox(height: 20,),
-          Text('Плотность расписания', style: TextStyle(fontSize: 20),),
+          Row(children: [Text('Плотность расписания:'),
           DropdownButton<DensityMode>(
             value: densityMode,
             items: DensityMode.values.map((mode) {
@@ -57,9 +63,9 @@ class _SchedulePageState extends State<ScheduleSetupPage> {
             onChanged: (v) => setState(() {
              densityMode = v!;
             }),
-          ),
+          )]),
           SizedBox(height: 20,),
-          Text('Учитывать приоритет', style: TextStyle(fontSize: 20),),
+          Row(children: [Text('Учитывать приоритет:'),
           DropdownButton<PriorityMode>(
             value: priorityMode,
             items: PriorityMode.values.map((mode) {
@@ -68,15 +74,15 @@ class _SchedulePageState extends State<ScheduleSetupPage> {
             onChanged: (v) => setState(() {
               priorityMode = v!;
             }),
-          ),
-
-          Expanded(
+          )]),
+          SizedBox(
+              height: 320,
               child: ListView.builder(
                   itemCount: _controller.allSpaces.length,
                   itemBuilder: (_, index) {
                     final space = _controller.allSpaces[index];
                     return CheckboxListTile(
-                      title: Text(space.title, style: TextStyle(fontSize: 20),),
+                      title: Text(space.title),
                         value: _controller.isSelected(space.id),
                         onChanged: (_) {
                           setState(() {
@@ -91,7 +97,10 @@ class _SchedulePageState extends State<ScheduleSetupPage> {
               selectedSpacesIds: _controller.selectedSpacesIds,
               densityMode: densityMode,
               priorityMode: priorityMode,
+              dayStartTime: int.parse(dayStartTimeController.text),
+              dayEndTime: int.parse(dayEndTimeController.text)
             );
+            Navigator.push(context, MaterialPageRoute(builder: (context) => SchedulePage(spaces: _controller.selectedSpaces, parameters: params)));
           }, child:  Text('Продолжить'))
         ],
       ),

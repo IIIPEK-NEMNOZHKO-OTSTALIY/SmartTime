@@ -16,6 +16,7 @@ enum TaskFilter {
 class HomeController {
   HomeMode mode = HomeMode.spaces;
   TaskFilter filter = TaskFilter.all;
+  double progress = 0.60;
 
   final LocalStorageService lss = LocalStorageService();
   List<Space> spaces = [];

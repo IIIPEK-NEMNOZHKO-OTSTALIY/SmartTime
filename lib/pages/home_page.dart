@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'home_controller.dart';
-import '../schedule/schedule_setup/schedule_setup_page.dart';
+import 'package:smarttime2/widgets/home%20page%20widgets/HeroTaskCard.dart';
+import 'package:smarttime2/widgets/home%20page%20widgets/taskCard.dart';
+import '../features/home/home_controller.dart';
+import 'schedule_setup_page.dart';
+import '../core/theme/app_theme.dart';
+import '../widgets/home page widgets/spaceCard.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,95 +32,182 @@ class _HomePageState extends State<HomePage> {
       return const Center(child: CircularProgressIndicator());
     }
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _controller.mode == HomeMode.spaces
-              ? 'Пространства'
-              : _controller.currentSpace!.title,
-        ),
-        leading: _controller.mode == HomeMode.tasks
-          ? IconButton(
+      appBar: _controller.mode == HomeMode.tasks
+      ? AppBar(
+        leading: IconButton(
               icon: Icon(Icons.arrow_back),
               onPressed: () {
                 _controller.backToSpaces();
                 setState(() {});
               },
-        )
-            : null,
-        actions: _controller.mode == HomeMode.tasks
-        ? [
-          IconButton(icon: Icon(Icons.filter_alt_rounded), onPressed: () {
+        ),
+        actions: [IconButton(icon: Icon(Icons.filter_alt_rounded), onPressed: () {
             _controller.toggleFilter();
             setState(() {});
-            },
-          )
+            },)
         ]
-          : null,
-        ),
+      )
+      : null,
       body: _controller.mode == HomeMode.spaces
-        ? buildSpaces()
-        : buildTasks(),
+        ? homeBody()
+        : taskScreenBody(),
       floatingActionButton: _controller.mode == HomeMode.tasks
       ? FloatingActionButton(onPressed: () => addTaskDialog(), child: Icon(Icons.add),)
-      : Row(mainAxisAlignment: MainAxisAlignment.center, children: [FloatingActionButton(onPressed: () => addSpaceDialog(), child: Icon(Icons.add)),
-        FloatingActionButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleSetupPage(allSpaces: _controller.spaces))), child: Icon(Icons.calendar_today_outlined),)
-      ],)
+      : null
+    );
+  }
+  Widget homeBody() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 64,),
+        Padding(padding: EdgeInsets.all(16), child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Добрый день, Макар', style: AppText.title, ), //заглушка для имени
+            SizedBox(height: 4,),
+            Text('У вас 5 задач сегодня', style: AppText.subtitle,) //заглушка для текста
+          ],
+        ),),
+        HeroTaskCard(title: 'Алгебра', subtitle: 'Начнется через 25 минут', onDone: () {}),
+        Padding(padding: EdgeInsets.all(16), child: Card( //ОБЕРУНТО В ПАДДИНГ НА ВРЕМЯ
+          child: SizedBox(height: 120, child: Column(children: [
+            Text('Дрысясися', style: AppText.title,),
+            OutlinedButton(
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleSetupPage(allSpaces: _controller.spaces))),
+                child: Text('Кнопка для перехода к расписаниям (временно)'))
+          ])),
+        ),),
+        Padding(padding: EdgeInsets.all(16), child: Text('Мои пространства', style: AppText.title,)),
+        SpaceAddButton(onTap: () => addSpaceDialog(),),
+        buildSpaces()
+      ],
+    );
+  }
+  Widget taskScreenBody() {
+    final space = _controller.currentSpace!;
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: 12),
+          Padding(padding: EdgeInsets.all(16), child: Stack(
+            alignment: Alignment.center,
+            children: [
+
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                color: Theme.of(context).scaffoldBackgroundColor,
+                child: Text(
+                  space.title,
+                  style: AppText.title,
+                ),
+              ),
+            ],
+          )),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: SizedBox(
+                height: 220,
+                child: Image.asset(
+                  'assets/images/first.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 20),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: _controller.progress,
+                    minHeight: 12,
+                    backgroundColor: Colors.grey.shade300,
+                    valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                  ),
+                ),
+                Text(
+                  '${(_controller.progress * 100).round()}%',
+                  style: AppText.buttonsWhiteText,
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 24),
+          buildTasks(),
+        ],
+      ),
+    );
+  }
+
+  Widget buildTasks() {
+    final tasks = _controller.currentSpace!.tasks;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Мои задачи', style: AppText.title,),
+          SizedBox(height: 12),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: tasks.length,
+            itemBuilder: (_, index) {
+              final task = tasks[index];
+              return Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: Card(
+                  child: TaskCard(
+                    title: task.title,
+                    timeText: '${task.duration} мин',
+                    isDone: task.isDone,
+                    color: AppColors.primary,
+                    onToggle: () {
+                      _controller.toggleTask(task.id);
+                      setState(() {});
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
   Widget buildSpaces() {
-    return ListView.builder(
-      itemCount: _controller.spaces.length,
-      itemBuilder: (_, index) {
-        final space = _controller.spaces[index];
-        return ListTile(
-          title: Text(space.title),
-          onTap: () {
-            _controller.openSpace(space.id);
-            setState(() {});
-          },
-          onLongPress: () {
-            _controller.deleteSpace(space.id);
-            setState(() {});
-          },
-        );
-      }
+    return Expanded(child: ListView.builder(
+        itemCount: _controller.spaces.length,
+        itemBuilder: (_, index) {
+          final space = _controller.spaces[index];
+          return SpaceCard(
+              title: space.title,
+              totalTasks: space.tasks.length,
+              completedTasks: space.tasks.where((t) => t.isDone).length,
+              color: AppColors.primary,
+              onTap: () {
+                _controller.openSpace(space.id);
+                setState(() {});
+              },
+              onLongPress: () {
+                _controller.deleteSpace(space.id);
+                setState(() {});
+              });
+        })
     );
   }
-  Widget buildTasks() {
-    final tasks = _controller.currentSpace!.tasks;
-    return Column(
-      children: [
-        Text('Задач всего: ${_controller.currentSpace!.tasks.length} '),
-        Text('Выполнено задач: ${_controller.currentSpace!.tasks.length-_controller.remainingTasks()} '),
-        Text('Задач оосталось: ${_controller.remainingTasks()} '),
-        Expanded(child:
-          ListView.builder(
-            itemCount: tasks.length,
-            itemBuilder: (_, index) {
-              final task = tasks[index];
-              return ListTile(
-                title: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [Text(task.title, style: TextStyle(fontSize: 20),), Row( children: [ Text('Длительность: ${task.duration.toString()} '), Text(' Приоритет: ${task.priority.toString()}')])],
-                ),
-                trailing: Icon(task.isDone ? Icons.check_circle : Icons.circle_outlined),
-                onTap: () {
-                  _controller.toggleTask(task.id);
-                  setState(() {});
-                },
-                onLongPress: () {
-                  _controller.deleteTask(task.id);
-                  setState(() {});
-    },
-    );
 
-            }
-         ),
-        ),
-      ]
-    );
-  }
   void addSpaceDialog() {
     final controllerText = TextEditingController();
     showDialog(

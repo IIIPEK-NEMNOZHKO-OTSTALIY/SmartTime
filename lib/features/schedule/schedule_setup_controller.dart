@@ -1,5 +1,4 @@
-import '../../../core/models/schedule/schedule_parameters.dart';
-import '../../../core/models/space.dart';
+import '../../core/models/space.dart';
 
 class ScheduleSetupController {
   List<Space> allSpaces = [];

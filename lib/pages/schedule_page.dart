@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 //import 'package:flutter/services.dart';
 import 'package:collection/collection.dart';
-import 'package:smarttime2/features/home/home_page.dart';
-import 'schedule_controller.dart';
-import '../../core/models/space.dart';
-import '../../core/models/schedule/schedule_parameters.dart';
+import 'package:smarttime2/pages/home_page.dart';
+import '../features/schedule/schedule_controller.dart';
+import '../core/models/space.dart';
+import '../core/models/schedule/schedule_parameters.dart';
 
 class SchedulePage extends StatefulWidget {
   final List<Space> spaces;

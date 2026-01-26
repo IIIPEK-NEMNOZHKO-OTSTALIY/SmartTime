@@ -2,18 +2,21 @@ class Task {
   final String id;
   final String title;
   bool isDone;
-  DateTime? dueTime;
-  DateTime? deadLine;
   final String duration;
   final String priority;
+
+  final DateTime? deadLine;
+  final DateTime? fixedStartTime;
 
   Task({
     required this.id,
     required this.title,
     this.isDone = false,
-    this.dueTime,
     this.duration = '60',
     this.priority = '3',
+
+    this.fixedStartTime = null,
+    this.deadLine = null,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -23,9 +26,12 @@ class Task {
       isDone: json['isDone'] ?? false,
       duration: json['duration'] ?? "60",
       priority: json['priority'] ?? "3",
-      dueTime: json['dueTime'] != null
-        ? DateTime.parse(json['dueTime'])
-        : null,
+      fixedStartTime: json['startTime'] != null
+          ? DateTime.parse(json['startTime'])
+          : null,
+      deadLine: json['deadLine'] != null
+          ? DateTime.parse(json['deadLine'])
+          : null,
     );
   }
 
@@ -35,7 +41,8 @@ class Task {
     'isDone': isDone,
     'priority': priority,
     'duration': duration,
-    'dueTime': dueTime?.toIso8601String(),
+    'deadLine': deadLine?.toIso8601String(),
+    'startTime': fixedStartTime?.toIso8601String(),
   };
 
   Task copyWith({
@@ -44,6 +51,8 @@ class Task {
     bool? isDone,
     String? duration,
     String? priority,
+    DateTime? fixedStartTime,
+    DateTime? deadLine,
 
   }) {
     return Task(
@@ -52,6 +61,8 @@ class Task {
       isDone: isDone ?? this.isDone,
       duration: duration ?? this.duration,
       priority: priority ?? this.priority,
+      deadLine: deadLine ?? this.deadLine,
+      fixedStartTime: fixedStartTime ?? this.fixedStartTime,
     );
   }
 }

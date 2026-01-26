@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 //import 'package:flutter/services.dart';
 import '../../../core/models/space.dart';
-import '../../../core/models/schedule_parameters.dart';
+import '../../../core/models/schedule/schedule_parameters.dart';
 import 'schedule_setup_controller.dart';
 import '../schedule_page.dart';
 
@@ -101,7 +101,10 @@ class _SchedulePageState extends State<ScheduleSetupPage> {
               dayEndTime: int.parse(dayEndTimeController.text)
             );
             Navigator.push(context, MaterialPageRoute(builder: (context) => SchedulePage(spaces: _controller.selectedSpaces, parameters: params)));
-          }, child:  Text('Продолжить'))
+          }, child:  Text('Продолжить')),
+          OutlinedButton(onPressed: () {
+            Navigator.pop(context);
+          }, child:  Text('Отмена'))
         ],
       ),
     );

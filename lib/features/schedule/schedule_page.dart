@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 //import 'package:flutter/services.dart';
 import 'package:collection/collection.dart';
+import 'package:smarttime2/features/home/home_page.dart';
 import 'schedule_controller.dart';
 import '../../core/models/space.dart';
-import '../../core/models/schedule_parameters.dart';
+import '../../core/models/schedule/schedule_parameters.dart';
 
 class SchedulePage extends StatefulWidget {
   final List<Space> spaces;
@@ -59,23 +60,28 @@ class _SchedulePageState extends State<SchedulePage> {
                       itemCount: dayTile.tasks.length,
                       itemBuilder: (_, index) {
                         final task = dayTile.tasks[index];
-                        return ListTile(
-                          title: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(task.taskTitle, style: TextStyle(
-                                  fontSize: 20),),
-                              Text('${_controller.formatTime(
-                                  task.startTime)} - ${_controller.formatTime(
-                                  task.endTime)} (${task.duration
-                                  .toString()} минут) '),
-                            ],
-                          ),
-                          trailing: Icon(task.isDone ? Icons.check_circle : Icons
-                              .circle_outlined),
-                          onTap: () {
-                            setState(() {_controller.toggleTask(task.taskId);});
-                          },
+                        return Column(
+                          children: [
+                            ListTile(
+                              title: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(task.taskTitle, style: TextStyle(
+                                      fontSize: 20),),
+                                  Text('${_controller.formatTime(
+                                      task.startTime)} - ${_controller.formatTime(
+                                      task.endTime)} (${task.duration
+                                      .toString()} минут) '),
+                                ],
+                              ),
+                              trailing: Icon(task.isDone ? Icons.check_circle : Icons
+                                  .circle_outlined),
+                              onTap: () {
+                              setState(() {_controller.toggleTask(task.taskId);});},
+                            ),
+                            if(task.breakAfter > 0)
+                              Text('Перерыв ${task.breakAfter} минут', style: TextStyle(color: Colors.grey),)
+                          ],
                         );
                       })
                 ),
@@ -83,11 +89,10 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () => Navigator.pop(context),
-          child: Icon(Icons.home_rounded),)
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage())),
+          child: Icon(Icons.home_rounded),),
     );
   }
-
   Widget buildWeekBar() {
     final days = _controller.getCurrentWeek();
     return (

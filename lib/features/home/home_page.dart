@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:smarttime2/features/schedule/schedule_page.dart';
 import 'home_controller.dart';
 import '../schedule/schedule_setup/schedule_setup_page.dart';
 
@@ -58,14 +57,10 @@ class _HomePageState extends State<HomePage> {
         ? buildSpaces()
         : buildTasks(),
       floatingActionButton: _controller.mode == HomeMode.tasks
-      ? Row(children: <Widget>[
-        FloatingActionButton(onPressed: () => addTaskDialog(), child: Icon(Icons.add),), SizedBox(width: 10),
-        FloatingActionButton(onPressed: _controller.currentSpace == null
-          ? null
-          : () => Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleSetupPage(allSpaces: _controller.spaces!))), child: Icon(Icons.calendar_today_outlined),)
-      ],
-      mainAxisAlignment: MainAxisAlignment.center,)
-      : FloatingActionButton(onPressed: () => addSpaceDialog(), child: Icon(Icons.add)),
+      ? FloatingActionButton(onPressed: () => addTaskDialog(), child: Icon(Icons.add),)
+      : Row(mainAxisAlignment: MainAxisAlignment.center, children: [FloatingActionButton(onPressed: () => addSpaceDialog(), child: Icon(Icons.add)),
+        FloatingActionButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleSetupPage(allSpaces: _controller.spaces))), child: Icon(Icons.calendar_today_outlined),)
+      ],)
     );
   }
 
@@ -113,8 +108,9 @@ class _HomePageState extends State<HomePage> {
                 onLongPress: () {
                   _controller.deleteTask(task.id);
                   setState(() {});
-                },
-              );
+    },
+    );
+
             }
          ),
         ),
@@ -152,51 +148,153 @@ class _HomePageState extends State<HomePage> {
     final controllerTitleText = TextEditingController();
     final controllerDurationText = TextEditingController(text: "60");
     final controllerPriorityText = TextEditingController(text: "3");
+
+    DateTime? deadLineDate;
+    DateTime? fixedTimeDate;
+    bool useDeadline = false;
+    bool useFixedTime = false;
+
     showDialog(
         context: context,
-        builder: (_) => AlertDialog(
-          title: Text('Новая задача'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: [
-                Text('Название задачи'),
-                TextField(
-                  controller: controllerTitleText,
-                  decoration: InputDecoration(hintText: 'Название'),
+        builder: (_) => StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text('Новая задача'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text('Название задачи'),
+                    TextField(
+                      controller: controllerTitleText,
+                      decoration: InputDecoration(hintText: 'Название'),
+                    ),
+                    SizedBox(height: 20),
+
+                    Text('Длительность задачи'),
+                    TextField(
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+                      controller: controllerDurationText,
+                      decoration: InputDecoration(hintText: 'Название'),
+                    ),
+                    SizedBox(height: 20),
+
+                    Text('Приоритет задачи'),
+                    TextField(
+                      controller: controllerPriorityText,
+                      decoration: InputDecoration(hintText: 'Название'),
+                    ),
+                    SizedBox(height: 20),
+
+                    CheckboxListTile(
+                        title: Text('Задать дэдлайн'),
+                        value: useDeadline,
+                        onChanged: (v) {
+                          setDialogState(() {
+                            useDeadline = v!;
+                            if (useDeadline) {
+                              useFixedTime = false;
+                              fixedTimeDate = null;
+                            } else {
+                              deadLineDate = null;
+                            }
+                          });
+                        },
+                    ),
+                    SizedBox(height: 20),
+                    CheckboxListTile(
+                      title: Text('Фиксированное время начала'),
+                      value: useFixedTime,
+                      onChanged: (v) {
+                        setDialogState(() {
+                          useFixedTime = v!;
+                          if (useFixedTime) {
+                            useDeadline = false;
+                            deadLineDate = null;
+                          } else {
+                            fixedTimeDate = null;
+                          }
+                        });
+                      },
+                    ),
+                    SizedBox(height: 20),
+
+                    if (useFixedTime)
+                      ListTile(
+                        title: Text(
+                          fixedTimeDate == null
+                              ? 'Выбрать дату и время'
+                              : fixedTimeDate.toString(),
+                        ),
+                        trailing: Icon(Icons.schedule),
+                        onTap: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(2100),
+                          );
+                          if (date == null) return;
+
+                          final time = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay.now(),
+                          );
+                          if (time == null) return;
+
+                          setDialogState(() {
+                            fixedTimeDate = DateTime(
+                              date.year,
+                              date.month,
+                              date.day,
+                              time.hour,
+                              time.minute,
+                            );
+                          });
+                        },
+                      ),
+                    if (useDeadline)
+                      ListTile(
+                        title: Text(
+                          deadLineDate == null
+                              ? 'Выбрать дату'
+                              : 'Дедлайн: ${deadLineDate!.toLocal()}'.split(' ')[0],
+                        ),
+                        trailing: Icon(Icons.calendar_today),
+                        onTap: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(2100),
+                          );
+                          if (date != null) {
+                            setDialogState(() => deadLineDate = date);
+                          }
+                        },
+                      ),
+                  ],
                 ),
-                SizedBox(height: 20),
-                Text('Длительность задачи'),
-                TextField(
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
-                  controller: controllerDurationText,
-                  decoration: InputDecoration(hintText: 'Название'),
-                ),
-                SizedBox(height: 20),
-                Text('Приоритет задачи'),
-                TextField(
-                  controller: controllerPriorityText,
-                  decoration: InputDecoration(hintText: 'Название'),
-                ),
-              ],
-            )
-          ),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('Отмена')
-            ),
-            ElevatedButton(
-                onPressed: () {
-                  _controller.addTask(controllerTitleText.text, controllerDurationText.text, controllerPriorityText.text,);
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(context), child: Text('Отмена')),
+                ElevatedButton(onPressed: () {
+                  _controller.addTask(
+                      controllerTitleText.text,
+                      controllerDurationText.text,
+                      controllerPriorityText.text,
+                      fixedTimeDate,
+                      deadLineDate
+                  );
                   Navigator.pop(context);
                   setState(() {});
                 },
-                child: Text('Добавить')
-            )
-          ],
-        ),
+                    child: Text('Добавить'))
+              ],
+            );
+          }
+        )
     );
   }
 }
-

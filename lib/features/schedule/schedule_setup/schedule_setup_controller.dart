@@ -1,4 +1,4 @@
-import '../../../core/models/schedule_parameters.dart';
+import '../../../core/models/schedule/schedule_parameters.dart';
 import '../../../core/models/space.dart';
 
 class ScheduleSetupController {

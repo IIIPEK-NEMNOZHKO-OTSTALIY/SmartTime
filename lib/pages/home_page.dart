@@ -34,13 +34,16 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: _controller.mode == HomeMode.tasks
       ? AppBar(
+        backgroundColor: AppColors.background,
         leading: IconButton(
-              icon: Icon(Icons.arrow_back),
+              icon: Icon(Icons.arrow_back_ios_sharp),
               onPressed: () {
                 _controller.backToSpaces();
                 setState(() {});
               },
         ),
+        centerTitle: true,
+        title: Text(_controller.currentSpace!.title, style: AppText.title,),
         actions: [IconButton(icon: Icon(Icons.filter_alt_rounded), onPressed: () {
             _controller.toggleFilter();
             setState(() {});
@@ -52,7 +55,7 @@ class _HomePageState extends State<HomePage> {
         ? homeBody()
         : taskScreenBody(),
       floatingActionButton: _controller.mode == HomeMode.tasks
-      ? FloatingActionButton(onPressed: () => addTaskDialog(), child: Icon(Icons.add),)
+      ? FloatingActionButton(onPressed: () => addTaskDialog(), shape: CircleBorder(), backgroundColor: AppColors.primary, child: Icon(Icons.add, color: AppColors.card,),)
       : null
     );
   }
@@ -64,100 +67,90 @@ class _HomePageState extends State<HomePage> {
         Padding(padding: EdgeInsets.all(16), child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Добрый день, Макар', style: AppText.title, ), //заглушка для имени
+            Text('Добрый день, Макар', style: AppText.hugeTitle, ), //заглушка для имени
             SizedBox(height: 4,),
             Text('У вас 5 задач сегодня', style: AppText.subtitle,) //заглушка для текста
           ],
         ),),
-        HeroTaskCard(title: 'Алгебра', subtitle: 'Начнется через 25 минут', onDone: () {}),
-        Padding(padding: EdgeInsets.all(16), child: Card( //ОБЕРУНТО В ПАДДИНГ НА ВРЕМЯ
-          child: SizedBox(height: 120, child: Column(children: [
-            Text('Дрысясися', style: AppText.title,),
-            OutlinedButton(
-                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleSetupPage(allSpaces: _controller.spaces))),
-                child: Text('Кнопка для перехода к расписаниям (временно)'))
-          ])),
-        ),),
+        HeroTaskCard(title: 'Алгебра', subtitle: 'Начнется через 25 минут', onDone: () {}, color: AppColors.primary),
+        GoToScheduleButton(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleSetupPage(allSpaces: _controller.spaces))),
+        ),
         Padding(padding: EdgeInsets.all(16), child: Text('Мои пространства', style: AppText.title,)),
-        SpaceAddButton(onTap: () => addSpaceDialog(),),
+        SpaceAddButton(onTap: () => addSpaceDialog()),
         buildSpaces()
       ],
     );
   }
   Widget taskScreenBody() {
     final space = _controller.currentSpace!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(padding: EdgeInsets.all(16),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: AppColors.background
+          ),
+          height: 120,
+          width: double.infinity,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.asset('assets/images/first.png', fit: BoxFit.cover),
+          )
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(height: 12),
-          Padding(padding: EdgeInsets.all(16), child: Stack(
-            alignment: Alignment.center,
+          ),
+        ),
+        Padding(padding: EdgeInsets.symmetric(horizontal: 32, vertical: 6,), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SizedBox(height: 6,),
+          Row(
             children: [
-
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 4),
-                color: Theme.of(context).scaffoldBackgroundColor,
-                child: Text(
-                  space.title,
-                  style: AppText.title,
-                ),
-              ),
-            ],
-          )),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: SizedBox(
-                height: 220,
-                child: Image.asset(
-                  'assets/images/first.png',
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: 20),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: _controller.progress,
-                    minHeight: 12,
-                    backgroundColor: Colors.grey.shade300,
-                    valueColor: AlwaysStoppedAnimation(AppColors.primary),
+              Text('Мои задачи', style: AppText.title,),
+              SizedBox(width: 100,),
+              Expanded(child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('${_controller.currentSpace!.tasks.length - _controller.remainingTasks()} / ${_controller.currentSpace!.tasks.length} выполнено', style: AppText.subtitle,),
+                  Row(
+                    children: [
+                      Expanded(child: ClipRRect(
+                        borderRadius: BorderRadius.circular(5),
+                        child: LinearProgressIndicator(
+                          value: _controller.progress(),
+                          minHeight: 5,
+                          backgroundColor: AppColors.background.withValues(),
+                          valueColor: AlwaysStoppedAnimation(
+                            AppColors.primary,
+                          ),
+                        ),
+                      ),),
+                      Text('${(_controller.progress()*100).round()}%', style: AppText.subtitle,),
+                    ],
                   ),
-                ),
-                Text(
-                  '${(_controller.progress * 100).round()}%',
-                  style: AppText.buttonsWhiteText,
-                ),
-              ],
-            ),
+                ],
+              ))
+            ],
           ),
-          SizedBox(height: 24),
-          buildTasks(),
+
+        ],),),
+
+        SizedBox(height: 12),
+        Expanded(child: ListView(
+        children: [
+          buildTasks()
         ],
-      ),
+      ))],
     );
   }
 
   Widget buildTasks() {
     final tasks = _controller.currentSpace!.tasks;
-
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Мои задачи', style: AppText.title,),
-          SizedBox(height: 12),
           ListView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
@@ -172,10 +165,14 @@ class _HomePageState extends State<HomePage> {
                     timeText: '${task.duration} мин',
                     isDone: task.isDone,
                     color: AppColors.primary,
-                    onToggle: () {
+                    onTap: () {
                       _controller.toggleTask(task.id);
                       setState(() {});
                     },
+                    onLongPress: () {
+                      _controller.deleteTask(task.id);
+                      setState(() {});
+                    }
                   ),
                 ),
               );
@@ -185,7 +182,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
   Widget buildSpaces() {
     return Expanded(child: ListView.builder(
         itemCount: _controller.spaces.length,
@@ -210,29 +206,92 @@ class _HomePageState extends State<HomePage> {
 
   void addSpaceDialog() {
     final controllerText = TextEditingController();
+    Color selectedColor = AppColors.primary;
+
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Новое пространство'),
-        content: TextField(
-          controller: controllerText,
-          decoration: InputDecoration(hintText: 'Название'),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Отмена')
-          ),
-          ElevatedButton(
-              onPressed: () {
-                _controller.addSpace(controllerText.text);
-                Navigator.pop(context);
-                setState(() {});
-              },
-              child: Text('Добавить')
-          )
-        ],
-      ),
+      builder: (_) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            backgroundColor: AppColors.background,
+            title: Text('Новое пространство', style: AppText.title,),
+            content: SizedBox(
+              height: 250,
+              width: 300,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 6,),
+                  Text('Название:', style: AppText.cardTtle,),
+                  SizedBox(height: 12,),
+                  iosTextField(controller: controllerText, hint: 'Название'),
+                  SizedBox(height: 12,),
+                  Text('Цвет:', style: AppText.cardTtle,),
+                  SizedBox(height: 12,),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: AppColors.colors.map((color) {
+                      final isSelected = color == selectedColor;
+                      return GestureDetector(
+                        onTap: () => {setDialogState(() => selectedColor = color)},
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                color,
+                                color.withAlpha(-50),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(8),
+                                blurRadius: 8,
+                              ),
+                            ],
+                            border: isSelected
+                                ? Border.all(color: AppColors.background, width: 2)
+                                : null,
+                          ),
+                          child: isSelected
+                              ? Icon(Icons.check,
+                              color: color!=AppColors.transp
+                                  ? Colors.white
+                                  : Colors.grey
+                          )
+                              : null,
+                        ),
+                      );
+                    }).toList(),
+                  )
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Отмена', style: AppText.subtitle,)
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    _controller.addSpace(controllerText.text);
+                    Navigator.pop(context);
+                    setState(() {});
+                  },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.buttonGradientColor
+                  ),
+                  child: Text('Добавить', style: TextStyle(color: AppColors.card, fontSize: 14),)
+              )
+            ],
+          );
+        },
+      )
     );
   }
   void addTaskDialog() {
@@ -250,36 +309,39 @@ class _HomePageState extends State<HomePage> {
         builder: (_) => StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text('Новая задача'),
+              backgroundColor: AppColors.background,
+              title: Text('Новая задача', style: AppText.title,),
               content: SingleChildScrollView(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Название задачи'),
-                    TextField(
+                    SizedBox(height: 6),
+                    Text('Название задачи:', style: AppText.cardTtle,),
+                    SizedBox(height: 6),
+                    iosTextField(
                       controller: controllerTitleText,
-                      decoration: InputDecoration(hintText: 'Название'),
+                      hint: 'Название'
                     ),
                     SizedBox(height: 20),
-
-                    Text('Длительность задачи'),
-                    TextField(
+                    Text('Длительность задачи:', style: AppText.cardTtle),
+                    SizedBox(height: 6),
+                    iosTextField(
                       keyboardType: TextInputType.number,
-                      inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                       controller: controllerDurationText,
-                      decoration: InputDecoration(hintText: 'Название'),
+                      hint: 'Длительность в минутах'
+                      //inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                     ),
                     SizedBox(height: 20),
-
-                    Text('Приоритет задачи'),
-                    TextField(
+                    Text('Приоритет задачи:', style: AppText.cardTtle),
+                    SizedBox(height: 6),
+                    iosTextField(
+                      keyboardType: TextInputType.number,
                       controller: controllerPriorityText,
-                      decoration: InputDecoration(hintText: 'Название'),
+                      hint: 'Приоритет (1,2,3,4,5)'
                     ),
                     SizedBox(height: 20),
-
                     CheckboxListTile(
-                        title: Text('Задать дэдлайн'),
+                        title: Text('Задать дэдлайн', style: AppText.cardTtle),
                         value: useDeadline,
                         onChanged: (v) {
                           setDialogState(() {
@@ -295,7 +357,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     SizedBox(height: 20),
                     CheckboxListTile(
-                      title: Text('Фиксированное время начала'),
+                      title: Text('Фиксированное время начала', style: AppText.cardTtle),
                       value: useFixedTime,
                       onChanged: (v) {
                         setDialogState(() {
@@ -369,8 +431,12 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(context), child: Text('Отмена')),
-                ElevatedButton(onPressed: () {
+                TextButton(onPressed: () => Navigator.pop(context), child: Text('Отмена', style: AppText.subtitle,)),
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.buttonGradientColor
+                    ),
+                    onPressed: () {
                   _controller.addTask(
                       controllerTitleText.text,
                       controllerDurationText.text,
@@ -381,7 +447,8 @@ class _HomePageState extends State<HomePage> {
                   Navigator.pop(context);
                   setState(() {});
                 },
-                    child: Text('Добавить'))
+
+                    child: Text('Добавить',style: TextStyle(color: AppColors.card, fontSize: 14),),)
               ],
             );
           }

@@ -5,9 +5,11 @@ class HeroTaskCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onDone;
+  final Color color;
 
   const HeroTaskCard({
     super.key,
+    required this.color,
     required this.title,
     required this.subtitle,
     required this.onDone,
@@ -22,15 +24,15 @@ class HeroTaskCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           gradient: LinearGradient(
             colors: [
-              AppColors.primary,
-              AppColors.primary.withValues(),
+              color,
+              color.withAlpha(150),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withValues(),
+              color: color.withValues(),
               blurRadius: 20,
               offset: Offset(0, 10),
             ),

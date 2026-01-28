@@ -22,11 +22,21 @@ class AppColors {
   static const card = Colors.white;
 
   static const primary = Color(0xff2b6dff);
-  static const secondary = Color(0xFF6EDC8C);
-  static const accent = Color(0xFFFFC83D);
+  static const green = Color(0xFF0FC163);
+  static const peach = Color(0xFFF69077);
+  static const cheery = Color(0xFFC10063);
+  static const indigo = Color(0xFF5A38E8);
+  static const purple = Color(0xFFB02DE6);
+  static const yellow = Color(0xFFFFC83D);
+  static const transp = Colors.white;
+
+  static const colors = [
+    primary, cheery, green, yellow, peach, indigo, purple, transp
+  ];
 
   static const textPrimary = Color(0xFF1F2937);
   static const textSecondary = Color(0xFF6B7280);
+  static const lightGray = Color(0xFFBEC8D5);
 
   static const buttonGradientColor = Color(0xff2b6dff);
   static const deadlineDanger = Color(0xFFFF6B6B);
@@ -36,6 +46,11 @@ class AppText {
   static const title = TextStyle(
       fontSize: 22,
       fontWeight: FontWeight.w600,
+      color: AppColors.textPrimary
+  );
+  static const hugeTitle = TextStyle(
+      fontSize: 28,
+      fontWeight: FontWeight.w700,
       color: AppColors.textPrimary
   );
   static const subtitle = TextStyle(
@@ -56,4 +71,10 @@ class AppText {
     fontSize: 18,
     color: AppColors.background,
   );
+  static const progressText = TextStyle(
+    fontSize: 28,
+    fontWeight: FontWeight.w800,
+    color: AppColors.primary
+  );
+
 }

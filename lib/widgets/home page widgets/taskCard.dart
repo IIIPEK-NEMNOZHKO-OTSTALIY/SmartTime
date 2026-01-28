@@ -6,7 +6,8 @@ class TaskCard extends StatelessWidget {
   final String timeText;
   final bool isDone;
   final Color color;
-  final VoidCallback onToggle;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
 
   const TaskCard({
     super.key,
@@ -14,7 +15,8 @@ class TaskCard extends StatelessWidget {
     required this.timeText,
     required this.isDone,
     required this.color,
-    required this.onToggle,
+    required this.onTap,
+    required this.onLongPress,
   });
 
   @override
@@ -63,10 +65,11 @@ class TaskCard extends StatelessWidget {
                               ? Icons.check_circle
                               : Icons.radio_button_unchecked,
                           color: isDone
-                              ? AppColors.accent
+                              ? color
                               : AppColors.textSecondary,
                         ),
-                        onPressed: onToggle,
+                        onPressed: onTap,
+                        onLongPress: onLongPress,
                       ),
                     ],
                   ),
@@ -79,3 +82,5 @@ class TaskCard extends StatelessWidget {
     );
   }
 }
+
+

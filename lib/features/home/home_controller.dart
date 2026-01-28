@@ -16,18 +16,22 @@ enum TaskFilter {
 class HomeController {
   HomeMode mode = HomeMode.spaces;
   TaskFilter filter = TaskFilter.all;
-  double progress = 0.60;
 
   final LocalStorageService lss = LocalStorageService();
   List<Space> spaces = [];
   Space? currentSpace;
   bool isLoading = false;
 
+  double progress() {
+    if (currentSpace!.tasks.length!=0) {
+      return (currentSpace!.tasks.length-remainingTasks())/currentSpace!.tasks.length; }
+    return 0;
+  }
+
   void openSpace(String spaceId) {
     currentSpace = spaces.firstWhere((a)=>a.id == spaceId);
     mode = HomeMode.tasks;
   }
-
   void backToSpaces() {
     currentSpace = null;
     mode = HomeMode.spaces;
@@ -89,36 +93,36 @@ class HomeController {
   }
 }
 
-void toggleTask(String taskId) {
-  final task = currentSpace!.tasks.firstWhere(((t) => t.id == taskId));
-  task.isDone = !task.isDone;
-  save();
-}
-
-void toggleFilter(){
-  switch (filter) {
-    case TaskFilter.all:
-      filter = TaskFilter.active;
-      break;
-    case TaskFilter.active:
-      filter = TaskFilter.completed;
-      break;
-    case TaskFilter.completed:
-      filter = TaskFilter.all;
-      break;
+  void toggleTask(String taskId) {
+    final task = currentSpace!.tasks.firstWhere(((t) => t.id == taskId));
+    task.isDone = !task.isDone;
+    save();
   }
-}
 
-void switchSpace(spaceId) {
-  currentSpace = spaces.firstWhere(((s)=>s.id == spaceId));
-  mode = HomeMode.tasks;
-}
+  void toggleFilter(){
+    switch (filter) {
+      case TaskFilter.all:
+        filter = TaskFilter.active;
+        break;
+      case TaskFilter.active:
+        filter = TaskFilter.completed;
+        break;
+      case TaskFilter.completed:
+        filter = TaskFilter.all;
+        break;
+    }
+  }
 
-Future<void> save() async{
-  await lss.saveSpaces(spaces);
-}
+  void switchSpace(spaceId) {
+    currentSpace = spaces.firstWhere(((s)=>s.id == spaceId));
+    mode = HomeMode.tasks;
+  }
 
-int remainingTasks() {
-  return currentSpace!.tasks.where((t) => !t.isDone).length;
-}
+  Future<void> save() async{
+    await lss.saveSpaces(spaces);
+  }
+
+  int remainingTasks() {
+    return currentSpace!.tasks.where((t) => !t.isDone).length;
+  }
 }

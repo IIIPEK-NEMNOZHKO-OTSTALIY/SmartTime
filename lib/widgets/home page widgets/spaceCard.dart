@@ -151,7 +151,6 @@ class GoToScheduleButton extends StatelessWidget{
     );
   }
 }
-
 Widget iosTextField({
   required TextEditingController controller,
   required String hint,

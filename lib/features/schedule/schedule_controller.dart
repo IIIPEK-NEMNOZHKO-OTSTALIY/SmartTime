@@ -238,7 +238,7 @@ class ScheduleController {
   }
   List<Task> sortTasks(List<Task> tasks) {
     tasks.sort((a, b) {
-      if ((a.priority != b.priority) && (parameters.priorityMode == PriorityMode.on)) {
+      if ((a.priority != b.priority) && (parameters.priorityMode == true)) {
         return a.priority.compareTo(b.priority);
       }
       return a.duration.compareTo(b.duration);

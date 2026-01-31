@@ -83,7 +83,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
   Widget taskScreenBody() {
-    final space = _controller.currentSpace!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

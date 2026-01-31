@@ -3,15 +3,11 @@ enum DensityMode {
   balanced,
   dense,
 }
-enum PriorityMode {
-  on,
-  off,
-}
 class ScheduleParameters {
   final int dayStartTime;
   final int dayEndTime;
   final DensityMode densityMode;
-  final PriorityMode priorityMode;
+  final bool priorityMode;
   final List<String> selectedSpacesIds;
 
   ScheduleParameters({
@@ -19,6 +15,6 @@ class ScheduleParameters {
     this.dayEndTime = 22*60,
     this.dayStartTime = 9*60,
     this.densityMode = DensityMode.balanced,
-    this.priorityMode = PriorityMode.on,
+    this.priorityMode = true,
   });
 }

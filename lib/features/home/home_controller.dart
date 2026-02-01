@@ -1,6 +1,7 @@
 import '../../core/models/space.dart';
 import '../../core/models/task.dart';
 import '../../core/services/local_storage/local_storage_service.dart';
+import 'package:flutter/material.dart';
 
 enum HomeMode {
   spaces,
@@ -36,9 +37,10 @@ class HomeController {
     currentSpace = null;
     mode = HomeMode.spaces;
   }
-  void addSpace(String title) {
+  void addSpace(String title, Color color) {
     final newSpace = Space(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
+      color: color,
       title: title,
       tasks: [],
     );

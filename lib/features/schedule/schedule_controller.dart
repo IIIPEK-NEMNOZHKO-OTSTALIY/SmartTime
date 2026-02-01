@@ -246,23 +246,24 @@ class ScheduleController {
     return tasks;
   }
 
-
+  int weekOffset = 0;
   DateTime getWeekStart(DateTime date) {
     return date.subtract(Duration(days: date.weekday - 1));
   }
   List<DateTime> getCurrentWeek() {
-    return List.generate(7, (i)=>weekStart.add(Duration(days: i)));
+    final now = DateTime.now().add(Duration(days: weekOffset*7));
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+
+    return List.generate(7, (i)=>monday.add(Duration(days: i)));
   }
   void selectDay(DateTime day) {
     selectedDay = day;
   }
   void nextWeek() {
-    weekStart = weekStart.add(Duration(days: 7));
-    selectedDay = weekStart;
+    weekOffset++;
   }
   void previousWeek() {
-    weekStart = weekStart.subtract(Duration(days: 7));
-    selectedDay = weekStart;
+    weekOffset--;
   }
 
   int getBreakDuration(DensityMode mode) {
@@ -275,7 +276,6 @@ class ScheduleController {
         return 5;
     }
   }
-
   bool isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
@@ -289,8 +289,6 @@ class ScheduleController {
         )
     );
   }
-
-
   StoredSchedule exportSchedule() {
     return StoredSchedule(
       generatedAt: DateTime.now(),

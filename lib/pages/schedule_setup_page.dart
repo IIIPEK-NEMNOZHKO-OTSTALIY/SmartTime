@@ -74,14 +74,14 @@ class _SchedulePageState extends State<ScheduleSetupPage> {
               keyboardType: TextInputType.number,
               //inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly,],
               controller: dayStartTimeController,
-              hint: 'Время начала рабочего дня'
+              hint: 'Время начала рабочего дня (в мин)'
             ),
             SizedBox(height: 20,),
             iosTextField(
               keyboardType: TextInputType.number,
               //inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly,],
               controller: dayEndTimeController,
-              hint: 'Время окончания рабочего дня'
+              hint: 'Время окончания рабочего дня (в мин)'
             ),
             SizedBox(height: 40,),
             Text('Параметры генерации', style: AppText.mediumtitle,),
@@ -132,14 +132,14 @@ class _SchedulePageState extends State<ScheduleSetupPage> {
                     itemCount: _controller.allSpaces.length,
                     itemBuilder: (_, index) {
                       final space = _controller.allSpaces[index];
-                      return CheckboxListTile(
-                        title: Text(space.title),
-                          value: _controller.isSelected(space.id),
-                          onChanged: (_) {
-                            setState(() {
-                              _controller.toggleSpace(space.id);
-                            });
-                          }
+                      return SpaceListCard(
+                        title: space.title,
+                        onChanged: (_) {
+                          setState(() {
+                            _controller.toggleSpace(space.id);
+                          });
+                        },
+                        value: _controller.isSelected(space.id),
                       );
                 })
             ),

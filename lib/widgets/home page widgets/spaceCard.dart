@@ -89,7 +89,6 @@ class SpaceCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title, style: AppText.mediumtitle,),
-              SizedBox(height: 4,),
               Text('$percent% выполнено • $totalTasks задач', style: AppText.subtitle,),
             ],
           ),
@@ -142,7 +141,6 @@ class GoToScheduleButton extends StatelessWidget{
                 style: SpaceStyle.addSpaceButton,
                 onPressed: () {
                   onTap();
-
                 },
                 child: Row(children: [
                   Text('Перейти в расписание ', style: TextStyle(color: AppColors.textSecondary, fontSize: 18, ),),
@@ -155,7 +153,7 @@ Widget iosTextField({
   required TextEditingController controller,
   required String hint,
   TextInputType keyboardType = TextInputType.text,
-}) {
+  }) {
   return Container(
     height: 52,
     decoration: BoxDecoration(
@@ -172,6 +170,7 @@ Widget iosTextField({
     padding: EdgeInsets.symmetric(horizontal: 16),
     child: Center(
       child: TextField(
+        cursorColor: AppColors.primary,
         controller: controller,
         keyboardType: keyboardType,
         style: AppText.cardTtle,

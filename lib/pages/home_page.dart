@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:smarttime2/widgets/home%20page%20widgets/HeroTaskCard.dart';
 import 'package:smarttime2/widgets/home%20page%20widgets/taskCard.dart';
 import '../features/home/home_controller.dart';
 import 'schedule_setup_page.dart';
 import '../core/theme/app_theme.dart';
 import '../widgets/home page widgets/spaceCard.dart';
+import '../widgets/timeWidgets.dart';
 
+enum TaskTimeMode {deadline, fixed}
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -16,6 +17,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late final HomeController _controller;
+
 
   @override
   void initState() {
@@ -55,7 +57,7 @@ class _HomePageState extends State<HomePage> {
         ? homeBody()
         : taskScreenBody(),
       floatingActionButton: _controller.mode == HomeMode.tasks
-      ? FloatingActionButton(onPressed: () => addTaskDialog(), shape: CircleBorder(), backgroundColor: AppColors.primary, child: Icon(Icons.add, color: AppColors.card,),)
+      ? FloatingActionButton(onPressed: () => addTaskDialog(), shape: CircleBorder(), backgroundColor: _controller.currentSpace!.color, child: Icon(Icons.add, color: AppColors.card,),)
       : null
     );
   }
@@ -120,7 +122,7 @@ class _HomePageState extends State<HomePage> {
                           minHeight: 5,
                           backgroundColor: AppColors.background.withValues(),
                           valueColor: AlwaysStoppedAnimation(
-                            AppColors.primary,
+                            _controller.currentSpace!.color,
                           ),
                         ),
                       ),),
@@ -145,6 +147,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget buildTasks() {
     final tasks = _controller.currentSpace!.tasks;
+    Color color = _controller.currentSpace!.color;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -158,12 +161,13 @@ class _HomePageState extends State<HomePage> {
               final task = tasks[index];
               return Padding(
                 padding: EdgeInsets.only(bottom: 12),
+
                 child: Card(
                   child: TaskCard(
                     title: task.title,
                     timeText: '${task.duration} мин',
                     isDone: task.isDone,
-                    color: AppColors.primary,
+                    color: color,
                     onTap: () {
                       _controller.toggleTask(task.id);
                       setState(() {});
@@ -190,7 +194,7 @@ class _HomePageState extends State<HomePage> {
               title: space.title,
               totalTasks: space.tasks.length,
               completedTasks: space.tasks.where((t) => t.isDone).length,
-              color: AppColors.primary,
+              color: space.color,
               onTap: () {
                 _controller.openSpace(space.id);
                 setState(() {});
@@ -278,7 +282,7 @@ class _HomePageState extends State<HomePage> {
               ),
               ElevatedButton(
                   onPressed: () {
-                    _controller.addSpace(controllerText.text);
+                    _controller.addSpace(controllerText.text, selectedColor);
                     Navigator.pop(context);
                     setState(() {});
                   },
@@ -294,19 +298,23 @@ class _HomePageState extends State<HomePage> {
     );
   }
   void addTaskDialog() {
+
     final controllerTitleText = TextEditingController();
     final controllerDurationText = TextEditingController(text: "60");
     final controllerPriorityText = TextEditingController(text: "3");
 
+    final hoursController = TextEditingController();
+    final minutesController = TextEditingController();
+
     DateTime? deadLineDate;
     DateTime? fixedTimeDate;
-    bool useDeadline = false;
-    bool useFixedTime = false;
+    TaskTimeMode tasktimeMode = TaskTimeMode.deadline;
 
     showDialog(
         context: context,
         builder: (_) => StatefulBuilder(
           builder: (context, setDialogState) {
+
             return AlertDialog(
               backgroundColor: AppColors.background,
               title: Text('Новая задача', style: AppText.title,),
@@ -339,38 +347,67 @@ class _HomePageState extends State<HomePage> {
                       hint: 'Приоритет (1,2,3,4,5)'
                     ),
                     SizedBox(height: 20),
-                    CheckboxListTile(
-                        title: Text('Задать дэдлайн', style: AppText.cardTtle),
-                        value: useDeadline,
-                        onChanged: (v) {
-                          setDialogState(() {
-                            useDeadline = v!;
-                            if (useDeadline) {
-                              useFixedTime = false;
-                              fixedTimeDate = null;
-                            } else {
-                              deadLineDate = null;
-                            }
-                          });
+                    SizedBox(
+                      width: double.infinity,
+                      child: ToggleButtons(
+                        borderRadius: BorderRadius.circular(16),
+                        selectedColor: AppColors.card,
+                        fillColor: AppColors.primary,
+                        onPressed: (index) {
+                          setDialogState(() {tasktimeMode = TaskTimeMode.values[index];});
                         },
+                        isSelected: [
+                          tasktimeMode == TaskTimeMode.deadline,
+                          tasktimeMode == TaskTimeMode.fixed,
+                        ],
+                        children: [
+                          Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Дедлайн', style: AppText.cardTtle,),),
+                          Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Фикс. время', style: AppText.cardTtle,),),
+                        ],
+                      ),
                     ),
-                    SizedBox(height: 20),
-                    CheckboxListTile(
-                      title: Text('Фиксированное время начала', style: AppText.cardTtle),
-                      value: useFixedTime,
-                      onChanged: (v) {
-                        setDialogState(() {
-                          useFixedTime = v!;
-                          if (useFixedTime) {
-                            useDeadline = false;
-                            deadLineDate = null;
-                          } else {
-                            fixedTimeDate = null;
-                          }
-                        });
-                      },
+                    if (tasktimeMode == TaskTimeMode.deadline )
+                      TimeCodeInput(hour: hoursController, minute: minutesController,)
+                    else
+                      FixedtimeEditor(),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(context), child: Text('Отмена', style: AppText.subtitle,)),
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.buttonGradientColor
                     ),
-                    SizedBox(height: 20),
+                    onPressed: () {
+                  _controller.addTask(
+                      controllerTitleText.text,
+                      controllerDurationText.text,
+                      controllerPriorityText.text,
+                      fixedTimeDate,
+                      deadLineDate
+                  );
+                  Navigator.pop(context);
+                  setState(() {});
+                },
+
+                    child: Text('Добавить',style: TextStyle(color: AppColors.card, fontSize: 14),),)
+              ],
+            );
+          }
+        )
+    );
+  }
+  Widget DeadlineEditor() {
+    return Text('');
+  }
+  Widget FixedtimeEditor() {
+    return Text('дэдлайн');
+  }
+
+}
+
+/*
 
                     if (useFixedTime)
                       ListTile(
@@ -426,32 +463,4 @@ class _HomePageState extends State<HomePage> {
                           }
                         },
                       ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(onPressed: () => Navigator.pop(context), child: Text('Отмена', style: AppText.subtitle,)),
-                ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.buttonGradientColor
-                    ),
-                    onPressed: () {
-                  _controller.addTask(
-                      controllerTitleText.text,
-                      controllerDurationText.text,
-                      controllerPriorityText.text,
-                      fixedTimeDate,
-                      deadLineDate
-                  );
-                  Navigator.pop(context);
-                  setState(() {});
-                },
-
-                    child: Text('Добавить',style: TextStyle(color: AppColors.card, fontSize: 14),),)
-              ],
-            );
-          }
-        )
-    );
-  }
-}
+ */

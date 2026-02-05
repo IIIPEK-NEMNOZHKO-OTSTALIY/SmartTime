@@ -6,6 +6,7 @@ import '../../core/models/space.dart';
 import '../../core/models/task.dart';
 import '../../core/models/schedule/schedule_parameters.dart';
 import '../../core/models/schedule/schedule_storage.dart';
+import '../../core/services/local_storage/local_schedule_storage.dart';
 
 class ScheduleController {
   final List<Space> spaces;
@@ -40,7 +41,40 @@ class ScheduleController {
     task.isDone = !task.isDone;
 
   }
+  Future<void> init() async {
+    final stored = await ScheduleStorageService.load();
 
+    if (stored == null || !isSameDay(stored.generatedAt, DateTime.now())) {
+      generateSchedule();
+      await ScheduleStorageService.save(exportSchedule());
+    }
+    else {
+      importSchedule(stored);
+    }
+  }
+  void importSchedule(StoredSchedule storedSchedule) {
+    timeline.clear();
+    for (final day in storedSchedule.days) {
+      final tile = ScheduleTile(tasks: [], day: day.date);
+
+      for (final task in day.tasks) {
+        tile.tasks.add(
+          ScheduleItem(
+              taskId: task.taskId,
+              taskTitle: task.title,
+              spaceId: task.spaceId,
+              duration: (task.end.hour*60+task.start.minute-task.end.hour*60-task.start.minute).toString(),
+              priority: '0',
+              isDone: false,
+              startTime: task.start,
+              endTime: task.end
+          )
+        );
+      }
+
+      timeline.add(tile);
+    }
+  }
   void generateSchedule() {
     timeline.clear();
 
@@ -129,6 +163,8 @@ class ScheduleController {
     for (final task in freeTasks) {
       place(task);
     }
+
+
   }
 
   DateTime _dayStart(DateTime d) =>

@@ -25,7 +25,7 @@ class _SchedulePageState extends State<SchedulePage> {
     super.initState();
     _weekPageController = PageController(initialPage: 1000);
     _controller = ScheduleController(spaces: widget.spaces, parameters: widget.parameters);
-    _controller.generateSchedule();
+    _controller.init();
     setState(() {});
   }
 

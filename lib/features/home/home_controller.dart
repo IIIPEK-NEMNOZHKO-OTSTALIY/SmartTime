@@ -3,6 +3,8 @@ import '../../core/models/task.dart';
 import '../../core/services/local_storage/local_storage_service.dart';
 import '../../core/services/local_storage/local_schedule_storage.dart';
 import '../../core/models/schedule/schedule_storage.dart';
+import 'package:collection/collection.dart';
+
 import 'package:flutter/material.dart';
 
 enum HomeMode {
@@ -16,28 +18,56 @@ enum TaskFilter {
 }
 
 class HomeController {
+
   HomeMode mode = HomeMode.spaces;
   TaskFilter filter = TaskFilter.all;
 
   final LocalStorageService lss = LocalStorageService();
 
   List<Space> spaces = [];
-  var schedule;
   Space? currentSpace;
   bool isLoading = false;
 
-  Future<StoredScheduleItem> getHeroTask() async {
-    final heroTask = schedule.day.task;
-    return StoredScheduleItem(
-      taskId:,
-      title:,
-      spaceId:,
-      breakAfter: ,
-      start: ,
-      end: ,
-    );
+  Future<StoredScheduleItem?> getHeroTask() async{
+    final schedule = await ScheduleStorageService.load();
+    if (schedule == null) {
+      return null;
+    }
+
+    final today = DateTime.now();
+    StoredDay? todaySchedule;
+
+    for (final day in schedule.days) {
+      if (day.date.year == today.year &&
+          day.date.month == today.month &&
+          day.date.day == today.day) {
+        todaySchedule = day;
+        break;
+      }
+    }
+
+    if (todaySchedule == null) {
+      return null;
+    }
+    for (final task in todaySchedule.tasks) {
+      final fromSpaceTask = spaces.firstWhere((s) => s.tasks.any((t) => t.id == task.taskId)).tasks.firstWhere((t) => t.id == task.taskId);
+      if (!fromSpaceTask.isDone &&
+          today.isAfter(task.start) &&
+          today.isBefore(task.end)) {
+        return task;
+      }
+    }
+
+    for (final task in todaySchedule.tasks) {
+      final fromSpaceTask = spaces.firstWhere((s) => s.tasks.any((t) => t.id == task.taskId)).tasks.firstWhere((t) => t.id == task.taskId);
+      if (!fromSpaceTask.isDone && task.start.isAfter(today)) {
+        return task;
+      }
+    }
+
+    return null;
   }
-  void toggleHeroTask() {
+  void toggleHeroTask(String taskId) {
   }
 
   double progress() {
@@ -93,7 +123,6 @@ class HomeController {
   Future<void> init() async {
     isLoading = true;
     spaces = await lss.loadSpaces();
-    schedule = await ScheduleStorageService.load();
     if (spaces.isNotEmpty) {
       currentSpace = spaces.first;
     }

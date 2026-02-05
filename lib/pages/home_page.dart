@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smarttime2/core/models/task.dart';
+import 'package:smarttime2/core/models/schedule/schedule_storage.dart';
 import 'package:smarttime2/widgets/home%20page%20widgets/HeroTaskCard.dart';
 import 'package:smarttime2/widgets/home%20page%20widgets/taskCard.dart';
 import '../features/home/home_controller.dart';
@@ -24,6 +24,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _controller = HomeController();
+    _loadHeroTask();
     _controller.init().then((_) {
       setState(() {});
     });
@@ -62,8 +63,12 @@ class _HomePageState extends State<HomePage> {
       : null
     );
   }
+  StoredScheduleItem? heroTask;
+  Future<void> _loadHeroTask() async {
+    final heroTask = await _controller.getHeroTask();
+    setState(() {});
+  }
   Widget homeBody() {
-    final heroTask = _controller.getHeroTask();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -73,12 +78,12 @@ class _HomePageState extends State<HomePage> {
           children: [
             Text('Добрый день, Макар', style: AppText.hugeTitle, ), //заглушка для имени
             SizedBox(height: 4,),
-            Text('У вас 5 задач сегодня', style: AppText.subtitle,) //заглушка для текста
+            Text('У вас 5 задач на сегодня', style: AppText.subtitle,) //заглушка для текста
           ],
         ),),
-
-
-        HeroTaskCard(title: 'Алгебра', subtitle: 'Начнется через 25 минут', onDone: () {}, color: AppColors.primary),
+        heroTask == null
+        ? HeroTaskCard(title: 'У вас нет предстоящих задач', subtitle: 'Самое время заняться чем-нибудь новым!', onDone: () {}, color: AppColors.primary)
+        : HeroTaskCard(title: heroTask!.title, subtitle: 'Начнется через 25 минут', onDone: () {}, color: _controller.spaces.firstWhere((s) => s.tasks.any((t) => t.id == heroTask!.taskId)).color),
         GoToScheduleButton(
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleSetupPage(allSpaces: _controller.spaces))),
         ),
@@ -430,7 +435,6 @@ class _HomePageState extends State<HomePage> {
                     onPressed: () {
                       DateTime? deadline;
                       DateTime? fixed;
-
                       if (tasktimeMode == TaskTimeMode.deadline) {
                         deadline = DateTime(
                             deadLineDate!.year,
@@ -448,6 +452,10 @@ class _HomePageState extends State<HomePage> {
                             int.parse(fixedtimeHourController.text),
                             int.parse(fixedtimeMinutesController.text)
                         );
+                      }
+                      else {
+                        fixed = null;
+                        deadline = null;
                       }
                       _controller.addTask(
                           controllerTitleText.text,

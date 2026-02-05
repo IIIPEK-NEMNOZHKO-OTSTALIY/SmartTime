@@ -1,13 +1,14 @@
 import '../../core/models/space.dart';
 import '../../core/models/task.dart';
 import '../../core/services/local_storage/local_storage_service.dart';
+import '../../core/services/local_storage/local_schedule_storage.dart';
+import '../../core/models/schedule/schedule_storage.dart';
 import 'package:flutter/material.dart';
 
 enum HomeMode {
   spaces,
   tasks
 }
-
 enum TaskFilter {
   all,
   active,
@@ -19,16 +20,31 @@ class HomeController {
   TaskFilter filter = TaskFilter.all;
 
   final LocalStorageService lss = LocalStorageService();
+
   List<Space> spaces = [];
+  var schedule;
   Space? currentSpace;
   bool isLoading = false;
+
+  Future<StoredScheduleItem> getHeroTask() async {
+    final heroTask = schedule.day.task;
+    return StoredScheduleItem(
+      taskId:,
+      title:,
+      spaceId:,
+      breakAfter: ,
+      start: ,
+      end: ,
+    );
+  }
+  void toggleHeroTask() {
+  }
 
   double progress() {
     if (currentSpace!.tasks.length!=0) {
       return (currentSpace!.tasks.length-remainingTasks())/currentSpace!.tasks.length; }
     return 0;
   }
-
   void openSpace(String spaceId) {
     currentSpace = spaces.firstWhere((a)=>a.id == spaceId);
     mode = HomeMode.tasks;
@@ -77,6 +93,7 @@ class HomeController {
   Future<void> init() async {
     isLoading = true;
     spaces = await lss.loadSpaces();
+    schedule = await ScheduleStorageService.load();
     if (spaces.isNotEmpty) {
       currentSpace = spaces.first;
     }

@@ -63,6 +63,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
   Widget homeBody() {
+    final heroTask = _controller.getHeroTask();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -75,6 +76,8 @@ class _HomePageState extends State<HomePage> {
             Text('У вас 5 задач сегодня', style: AppText.subtitle,) //заглушка для текста
           ],
         ),),
+
+
         HeroTaskCard(title: 'Алгебра', subtitle: 'Начнется через 25 минут', onDone: () {}, color: AppColors.primary),
         GoToScheduleButton(
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleSetupPage(allSpaces: _controller.spaces))),
@@ -300,9 +303,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   DateTime? deadLineDate;
+  DateTime? fixedTimeDate;
   final fixedtimeHourController = TextEditingController();
   final fixedtimeMinutesController = TextEditingController();
-
 
   final deadlineHourController = TextEditingController();
   final deadlineMinutesController = TextEditingController();
@@ -310,14 +313,12 @@ class _HomePageState extends State<HomePage> {
   final dateController = TextEditingController(text: 'Дата');
 
   void addTaskDialog() {
-
     final controllerTitleText = TextEditingController();
     final controllerPriorityText = TextEditingController(text: "3");
 
     final durationHoursController = TextEditingController();
     final durationMinutesController = TextEditingController();
 
-    DateTime? fixedTimeDate;
     TaskTimeMode tasktimeMode = TaskTimeMode.none;
 
     showDialog(
@@ -413,8 +414,10 @@ class _HomePageState extends State<HomePage> {
                     SizedBox(height: 4,),
                     if (tasktimeMode == TaskTimeMode.deadline )
                       DeadlineEditor()
+                    else if (tasktimeMode == TaskTimeMode.fixed)
+                      FixedtimeEditor()
                     else
-                      FixedtimeEditor(),
+                      NoneEditor()
                   ],
                 ),
               ),
@@ -479,85 +482,64 @@ class _HomePageState extends State<HomePage> {
         children: [
           Text('Дата:', style: AppText.cardTtle,),
           Expanded(child: Container()),
-          Container(width: 100, child: ListTile(
-            title: Text(dateController.text),
-            onTap: () async {
-            final DateTime? date = await showDatePicker(
-              context: context,
-              confirmText: 'Применить',
-              cancelText: 'Отменить',
-              helpText: 'Выберите дату',
-              initialDate: DateTime.now(),
-              firstDate: DateTime(2025),
-              lastDate: DateTime(2100),
-            );
-            if (date == null) return;
-            deadLineDate = date;
-          },))
+          Container(
+            width: 200,
+              child: ListTile(
+                title : deadLineDate?.year == null
+                    ? Text('Укажите дату', style: AppText.cardTtle.copyWith(color: Colors.grey.shade400,),)
+                    : Text('${deadLineDate!.year}:${deadLineDate!.month}:${deadLineDate!.day}', style: AppText.cardTtle,),
+                onTap: () async {
+                final DateTime? date = await showDatePicker(
+                  context: context,
+                  confirmText: 'Применить',
+                  cancelText: 'Отменить',
+                  helpText: 'Выберите дату',
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(2025),
+                  lastDate: DateTime(2100),
+                );
+                if (date == null) return;
+                deadLineDate = date;
+              },))
         ],
       )],)
     ],);
   }
   Widget FixedtimeEditor() {
-    return Text('фиксированное время'); //пока ничего
+    return Column(children: [
+      SizedBox(height: 20,),
+      iosForTimeContainer(children: [Row(
+        children: [
+          Text('Время:', style: AppText.cardTtle,),
+          Expanded(child: Container(),),
+          TimeCodeInput(hour: fixedtimeHourController, minute: fixedtimeMinutesController)
+        ],
+      )]),
+      SizedBox(height: 20,),
+      iosForTimeContainer(children: [Row(
+        children: [
+          Text('Дата:', style: AppText.cardTtle,),
+          Expanded(child: Container()),
+          Container(width: 100, child: ListTile(
+            title: Text(dateController.text),
+            onTap: () async {
+              final DateTime? date = await showDatePicker(
+                context: context,
+                confirmText: 'Применить',
+                cancelText: 'Отменить',
+                helpText: 'Выберите дату',
+                initialDate: DateTime.now(),
+                firstDate: DateTime(2025),
+                lastDate: DateTime(2100),
+              );
+              if (date == null) return;
+              fixedTimeDate = date;
+            },))
+        ],
+      )],)
+    ],);
   }
-
+  Widget NoneEditor() {
+    return Container();
+  }
 }
-
-/*
-
-                    if (useFixedTime)
-                      ListTile(
-                        title: Text(
-                          fixedTimeDate == null
-                              ? 'Выбрать дату и время'
-                              : fixedTimeDate.toString(),
-                        ),
-                        trailing: Icon(Icons.schedule),
-                        onTap: () async {
-                          final date = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime(2100),
-                          );
-                          if (date == null) return;
-
-                          final time = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay.now(),
-                          );
-                          if (time == null) return;
-
-                          setDialogState(() {
-                            fixedTimeDate = DateTime(
-                              date.year,
-                              date.month,
-                              date.day,
-                              time.hour,
-                              time.minute,
-                            );
-                          });
-                        },
-                      ),
-                    if (useDeadline)
-                      ListTile(
-                        title: Text(
-                          deadLineDate == null
-                              ? 'Выбрать дату'
-                              : 'Дедлайн: ${deadLineDate!.toLocal()}'.split(' ')[0],
-                        ),
-                        trailing: Icon(Icons.calendar_today),
-                        onTap: () async {
-                          final date = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime(2100),
-                          );
-                          if (date != null) {
-                            setDialogState(() => deadLineDate = date);
-                          }
-                        },
-                      ),
- */

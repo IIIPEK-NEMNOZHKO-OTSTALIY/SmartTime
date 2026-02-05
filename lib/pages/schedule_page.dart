@@ -68,16 +68,16 @@ class _SchedulePageState extends State<SchedulePage> {
                         itemCount: dayTile.tasks.length,
                         itemBuilder: (_, index) {
                           final task = dayTile.tasks[index];
+                          final taskIsDone = _controller.spaces.expand((space) => space.tasks).firstWhere((s) => s.id == task.taskId).isDone;
                           return Column( children: [
                               ScheduleTaskCard(
-                                  isDone: task.isDone,
+                                  isDone: taskIsDone,
                                   title: task.taskTitle,
-                                  duration: task.duration,
                                   timeString: '${_controller.formatTime(
                                       task.startTime)} - ${_controller.formatTime(
                                       task.endTime)} (${task.duration
                                       .toString()} минут)',
-                                  onTap: () {} ),
+                                  onTap: () {_controller.toggleTask(task.taskId); setState(() {});} ),
                               if(task.breakAfter > 0)
                                 ScheduleBreakTimeRow(breakTime: task.breakAfter)
                           ]

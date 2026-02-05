@@ -1,30 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
 
-Widget iosContainer({
-  required List<Widget> children,
-}) {
-  return Container(
-    height: 52,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withAlpha(10),
-          blurRadius: 12,
-          offset: Offset(0,4),
-        ),
-      ],
-    ),
-    padding: EdgeInsets.symmetric(horizontal: 16),
-    child: Column(
-      children: [
-        ...children
-      ],
-    ),
-  );
-}
 
 class SpaceListCard extends StatelessWidget {
   final String title;
@@ -66,11 +42,9 @@ class SpaceListCard extends StatelessWidget {
   }
 }
 
-
 ScheduleTaskCard({
   required isDone,
   required title,
-  required duration,
   required timeString,
   required onTap,
 }) {
@@ -101,7 +75,17 @@ ScheduleTaskCard({
                 )),
                 Padding(
                   padding: EdgeInsets.all(16),
-                  child:  Icon(isDone? Icons.check_circle : Icons.circle_outlined),
+                  child: IconButton(
+                    icon: Icon(
+                      isDone
+                          ? Icons.check_circle
+                          : Icons.radio_button_unchecked,
+                      color: isDone
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                    ),
+                    onPressed: onTap,
+                  ),
                 ),
               ],
         )
@@ -109,6 +93,7 @@ ScheduleTaskCard({
     )
   );
 }
+
 
 ScheduleBreakTimeRow({
   required breakTime,

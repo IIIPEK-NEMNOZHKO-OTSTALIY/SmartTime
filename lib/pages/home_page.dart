@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smarttime2/core/models/task.dart';
 import 'package:smarttime2/widgets/home%20page%20widgets/HeroTaskCard.dart';
 import 'package:smarttime2/widgets/home%20page%20widgets/taskCard.dart';
 import '../features/home/home_controller.dart';
@@ -7,7 +8,7 @@ import '../core/theme/app_theme.dart';
 import '../widgets/home page widgets/spaceCard.dart';
 import '../widgets/timeWidgets.dart';
 
-enum TaskTimeMode {deadline, fixed}
+enum TaskTimeMode {none, deadline, fixed}
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -297,18 +298,27 @@ class _HomePageState extends State<HomePage> {
       )
     );
   }
+
+  DateTime? deadLineDate;
+  final fixedtimeHourController = TextEditingController();
+  final fixedtimeMinutesController = TextEditingController();
+
+
+  final deadlineHourController = TextEditingController();
+  final deadlineMinutesController = TextEditingController();
+
+  final dateController = TextEditingController(text: 'Дата');
+
   void addTaskDialog() {
 
     final controllerTitleText = TextEditingController();
-    final controllerDurationText = TextEditingController(text: "60");
     final controllerPriorityText = TextEditingController(text: "3");
 
-    final hoursController = TextEditingController();
-    final minutesController = TextEditingController();
+    final durationHoursController = TextEditingController();
+    final durationMinutesController = TextEditingController();
 
-    DateTime? deadLineDate;
     DateTime? fixedTimeDate;
-    TaskTimeMode tasktimeMode = TaskTimeMode.deadline;
+    TaskTimeMode tasktimeMode = TaskTimeMode.none;
 
     showDialog(
         context: context,
@@ -322,52 +332,87 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 6),
-                    Text('Название задачи:', style: AppText.cardTtle,),
-                    SizedBox(height: 6),
+                    SizedBox(height: 6, width: double.infinity,),
+                    Text('Параметры задачи:', style: AppText.mediumtitle,),
+                    SizedBox(height: 12),
                     iosTextField(
                       controller: controllerTitleText,
                       hint: 'Название'
                     ),
                     SizedBox(height: 20),
-                    Text('Длительность задачи:', style: AppText.cardTtle),
-                    SizedBox(height: 6),
-                    iosTextField(
-                      keyboardType: TextInputType.number,
-                      controller: controllerDurationText,
-                      hint: 'Длительность в минутах'
-                      //inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
-                    ),
+                    iosForTimeContainer(children: [Row(
+                      children: [
+                        Text('Длительность: ', style: AppText.cardTtle,),
+                        Expanded(child: Container(),),
+                        TimeCodeInput(hour: durationHoursController, minute: durationMinutesController,)
+                      ],
+                    )]),
                     SizedBox(height: 20),
-                    Text('Приоритет задачи:', style: AppText.cardTtle),
-                    SizedBox(height: 6),
-                    iosTextField(
-                      keyboardType: TextInputType.number,
-                      controller: controllerPriorityText,
-                      hint: 'Приоритет (1,2,3,4,5)'
-                    ),
+                    iosForTimeContainer(children: [Row(
+                      children: [
+                        Text('Приоритет: ', style: AppText.cardTtle,),
+                        Expanded(child: Container(),),
+                        PriorityInput(priority: controllerPriorityText,)
+                      ],
+                    )]),
                     SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ToggleButtons(
-                        borderRadius: BorderRadius.circular(16),
-                        selectedColor: AppColors.card,
-                        fillColor: AppColors.primary,
-                        onPressed: (index) {
-                          setDialogState(() {tasktimeMode = TaskTimeMode.values[index];});
-                        },
-                        isSelected: [
-                          tasktimeMode == TaskTimeMode.deadline,
-                          tasktimeMode == TaskTimeMode.fixed,
-                        ],
-                        children: [
-                          Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Дедлайн', style: AppText.cardTtle,),),
-                          Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Фикс. время', style: AppText.cardTtle,),),
-                        ],
+                    Text('Дополнительные парамеры:', style: AppText.mediumtitle,),
+                    SizedBox(height: 8,),
+                    Row(children: [
+                      SizedBox(width: 12,),
+                      GestureDetector(
+                        onTap: () => setDialogState(() => tasktimeMode = TaskTimeMode.none),
+                        child: Column( children: [Container(
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            color: tasktimeMode == TaskTimeMode.none ? AppColors.primary : AppColors.background,
+                            border: Border.all(color: AppColors.card),
+                            borderRadius: BorderRadius.circular(16)
+                          ),
+                          child: Icon(Icons.not_interested, color: tasktimeMode == TaskTimeMode.none ? AppColors.card : Colors.grey.shade400,),
+                        ),
+                        Text('нет', style: TextStyle(fontFamily: 'Inter', color: tasktimeMode == TaskTimeMode.none ? AppColors.textPrimary : AppColors.textSecondary, fontWeight: FontWeight.w500),),
+                      ]),),
+                      Expanded(child: Container()),
+                      GestureDetector(
+                          onTap: () => setDialogState(() => tasktimeMode = TaskTimeMode.deadline),
+                          child: Column( children: [
+                            Container(
+                            height: 50,
+                            width: 50,
+                            decoration: BoxDecoration(
+                                color: tasktimeMode == TaskTimeMode.deadline ? AppColors.primary : AppColors.background,
+                                border: Border.all(color: AppColors.card),
+                                borderRadius: BorderRadius.circular(16)
+                            ),
+                            child: Icon(Icons.priority_high, color: tasktimeMode == TaskTimeMode.deadline ? AppColors.card : Colors.grey.shade400,),
+                          ),
+                          Text('дедлайн', style: TextStyle(fontFamily: 'Inter', color: tasktimeMode == TaskTimeMode.deadline ? AppColors.textPrimary : AppColors.textSecondary, fontWeight: FontWeight.w500),),
+                        ])
                       ),
-                    ),
+                      Expanded(child: Container()),
+                      GestureDetector(
+                          onTap: () => setDialogState(() => tasktimeMode = TaskTimeMode.fixed),
+                          child: Column(
+                              children: [
+                                Container(
+                                  height: 50,
+                                  width: 50,
+                                  decoration: BoxDecoration(
+                                      color: tasktimeMode == TaskTimeMode.fixed ? AppColors.primary : AppColors.background,
+                                      border: Border.all(color: AppColors.card),
+                                      borderRadius: BorderRadius.circular(16)
+                                  ),
+                                  child: Icon(Icons.lock_clock, color: tasktimeMode == TaskTimeMode.fixed ? AppColors.card : Colors.grey.shade400,),
+                                ),
+                                Text('фикс время', style: TextStyle(fontFamily: 'Inter', color: tasktimeMode == TaskTimeMode.fixed ? AppColors.textPrimary : AppColors.textSecondary, fontWeight: FontWeight.w500),),
+                      ]),),
+                      SizedBox(width: 12,),
+                    ],),
+                    SizedBox(height: 4,),
                     if (tasktimeMode == TaskTimeMode.deadline )
-                      TimeCodeInput(hour: hoursController, minute: minutesController,)
+                      DeadlineEditor()
                     else
                       FixedtimeEditor(),
                   ],
@@ -380,16 +425,37 @@ class _HomePageState extends State<HomePage> {
                         backgroundColor: AppColors.buttonGradientColor
                     ),
                     onPressed: () {
-                  _controller.addTask(
-                      controllerTitleText.text,
-                      controllerDurationText.text,
-                      controllerPriorityText.text,
-                      fixedTimeDate,
-                      deadLineDate
-                  );
-                  Navigator.pop(context);
-                  setState(() {});
-                },
+                      DateTime? deadline;
+                      DateTime? fixed;
+
+                      if (tasktimeMode == TaskTimeMode.deadline) {
+                        deadline = DateTime(
+                            deadLineDate!.year,
+                            deadLineDate!.month,
+                            deadLineDate!.day,
+                            int.parse(deadlineHourController.text),
+                            int.parse(deadlineMinutesController.text)
+                        );
+                      }
+                      else if (tasktimeMode == TaskTimeMode.fixed) {
+                        fixed = DateTime(
+                            fixedTimeDate!.year,
+                            fixedTimeDate!.month,
+                            fixedTimeDate!.day,
+                            int.parse(fixedtimeHourController.text),
+                            int.parse(fixedtimeMinutesController.text)
+                        );
+                      }
+                      _controller.addTask(
+                          controllerTitleText.text,
+                          (int.parse(durationHoursController.text)*60+int.parse(durationMinutesController.text)).toString(),
+                          controllerPriorityText.text,
+                          fixed,
+                          deadline
+                      );
+                      Navigator.pop(context);
+                      setState(() {});
+                    },
 
                     child: Text('Добавить',style: TextStyle(color: AppColors.card, fontSize: 14),),)
               ],
@@ -399,10 +465,41 @@ class _HomePageState extends State<HomePage> {
     );
   }
   Widget DeadlineEditor() {
-    return Text('');
+    return Column(children: [
+      SizedBox(height: 20,),
+      iosForTimeContainer(children: [Row(
+        children: [
+          Text('Время:', style: AppText.cardTtle,),
+          Expanded(child: Container(),),
+          TimeCodeInput(hour: deadlineHourController, minute: deadlineMinutesController)
+        ],
+      )]),
+      SizedBox(height: 20,),
+      iosForTimeContainer(children: [Row(
+        children: [
+          Text('Дата:', style: AppText.cardTtle,),
+          Expanded(child: Container()),
+          Container(width: 100, child: ListTile(
+            title: Text(dateController.text),
+            onTap: () async {
+            final DateTime? date = await showDatePicker(
+              context: context,
+              confirmText: 'Применить',
+              cancelText: 'Отменить',
+              helpText: 'Выберите дату',
+              initialDate: DateTime.now(),
+              firstDate: DateTime(2025),
+              lastDate: DateTime(2100),
+            );
+            if (date == null) return;
+            deadLineDate = date;
+          },))
+        ],
+      )],)
+    ],);
   }
   Widget FixedtimeEditor() {
-    return Text('дэдлайн');
+    return Text('фиксированное время'); //пока ничего
   }
 
 }

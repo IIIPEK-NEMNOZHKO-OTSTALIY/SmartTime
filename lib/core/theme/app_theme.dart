@@ -7,6 +7,23 @@ ThemeData appTheme() {
     splashColor: Colors.transparent,
     highlightColor: Colors.transparent,
 
+    datePickerTheme: DatePickerThemeData(
+      backgroundColor: AppColors.background,
+      cancelButtonStyle: ButtonStyle(
+        textStyle: WidgetStateProperty.all(TextStyle(fontFamily: 'Inter', color: AppColors.primary)),
+
+      ),
+      confirmButtonStyle: ButtonStyle(
+        textStyle: WidgetStateProperty.all(TextStyle(fontFamily: 'Inter', color: AppColors.primary)),
+      ),
+
+      headerHeadlineStyle: TextStyle(fontFamily: 'Inter', fontSize: 36)
+    ),
+    colorScheme: ColorScheme.light(
+      primary: AppColors.primary,
+      onPrimary: AppColors.card,
+      onSurface: AppColors.textPrimary
+    ),
     cardTheme: CardThemeData(
       color: AppColors.card,
       elevation: 0,

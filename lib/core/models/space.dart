@@ -18,7 +18,9 @@ class Space {
   factory Space.fromJson(Map<String, dynamic> json) {
     return Space(
       id: json['space_id'],
-      color: json['color'] ?? AppColors.primary,
+      color: json['color'] != null
+      ? Color(json['color'])
+      : AppColors.primary,
       title: json['space_title'],
       tasks: (json['tasks'] as List).map((e) => Task.fromJson(e)).toList(),
     );
@@ -28,6 +30,6 @@ class Space {
     'space_id' : id,
     'space_title' : title,
     'tasks' : tasks.map((e) => e.toJson()).toList(),
-    'color' : color,
+    'color' : color.value,
   };
 }

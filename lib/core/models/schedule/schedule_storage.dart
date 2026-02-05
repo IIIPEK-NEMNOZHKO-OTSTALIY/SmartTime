@@ -29,13 +29,13 @@ class StoredDay {
   StoredDay({required this.date, required this.tasks});
 
   Map<String, dynamic> toJson() => {
-    'date': date.toIso8601String().split('T').first,
+    'date': DateTime(date.year, date.month, date.day).toIso8601String(),
     'tasks': tasks.map((t) => t.toJson()).toList(),
   };
 
   factory StoredDay.fromJson(Map<String, dynamic> json) {
     return StoredDay(
-      date: DateTime.parse(json['date']),
+      date: DateTime.parse(json['date']).toLocal(),
       tasks: (json['tasks'] as List)
           .map((t) => StoredScheduleItem.fromJson(t))
           .toList(),

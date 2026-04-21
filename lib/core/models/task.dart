@@ -15,8 +15,8 @@ class Task {
     this.duration = '60',
     this.priority = '3',
 
-    this.fixedStartTime = null,
-    this.deadLine = null,
+    this.fixedStartTime,
+    this.deadLine,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {

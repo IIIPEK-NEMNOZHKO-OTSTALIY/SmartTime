@@ -50,7 +50,7 @@ class HeroTaskCard extends StatelessWidget {
                     Text(
                       'Ближайшая задача',
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: Colors.grey, //Colors.white70
                         fontSize: 14,
                       ),
                     ),
@@ -58,7 +58,7 @@ class HeroTaskCard extends StatelessWidget {
                     Text(
                       title,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Colors.black, //Colors.black
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -67,7 +67,7 @@ class HeroTaskCard extends StatelessWidget {
                     Text(
                       subtitle,
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: Colors.grey, //Colors.white70
                         fontSize: 14,
                       ),
                     ),

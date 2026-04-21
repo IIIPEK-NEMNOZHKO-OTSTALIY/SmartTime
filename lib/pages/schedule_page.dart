@@ -77,6 +77,7 @@ class _SchedulePageState extends State<SchedulePage> {
                                       task.startTime)} - ${_controller.formatTime(
                                       task.endTime)} (${task.duration
                                       .toString()} минут)',
+                                  color: _controller.spaces.firstWhere((s) => s.id == task.spaceId).color,
                                   onTap: () {_controller.toggleTask(task.taskId); setState(() {});} ),
                               if(task.breakAfter > 0)
                                 ScheduleBreakTimeRow(breakTime: task.breakAfter)

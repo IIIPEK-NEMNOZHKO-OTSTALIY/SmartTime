@@ -47,6 +47,7 @@ ScheduleTaskCard({
   required title,
   required timeString,
   required onTap,
+  required color,
 }) {
   return IntrinsicHeight(
     child: Padding(
@@ -57,7 +58,7 @@ ScheduleTaskCard({
                 Container(
                   width: 6,
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: color,
                     borderRadius: BorderRadius.horizontal(
                       left: Radius.circular(16),
                     ),

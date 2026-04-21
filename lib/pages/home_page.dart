@@ -68,7 +68,9 @@ class _HomePageState extends State<HomePage> {
     final heroTask = await _controller.getHeroTask();
     setState(() {});
   }
+
   Widget homeBody() {
+    _loadHeroTask();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -76,13 +78,13 @@ class _HomePageState extends State<HomePage> {
         Padding(padding: EdgeInsets.all(16), child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Добрый день, Макар', style: AppText.hugeTitle, ), //заглушка для имени
+            Text('Добрый день, Макар', style: AppText.hugeTitle, ),
             SizedBox(height: 4,),
-            Text('У вас 5 задач на сегодня', style: AppText.subtitle,) //заглушка для текста
+            Text('На сегодня у вас нет никаких задач!', style: AppText.subtitle,)
           ],
         ),),
         heroTask == null
-        ? HeroTaskCard(title: 'У вас нет предстоящих задач', subtitle: 'Самое время заняться чем-нибудь новым!', onDone: () {}, color: AppColors.primary)
+        ? HeroTaskCard(title: 'Похоже у вас нет ближайших задач!', subtitle: 'перейдите в расписание чтобы создать таковую', onDone: () {}, color: AppColors.card)
         : HeroTaskCard(title: heroTask!.title, subtitle: 'Начнется через 25 минут', onDone: () {}, color: _controller.spaces.firstWhere((s) => s.tasks.any((t) => t.id == heroTask!.taskId)).color),
         GoToScheduleButton(
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleSetupPage(allSpaces: _controller.spaces))),
@@ -142,9 +144,7 @@ class _HomePageState extends State<HomePage> {
               ))
             ],
           ),
-
         ],),),
-
         SizedBox(height: 12),
         Expanded(child: ListView(
         children: [
@@ -330,7 +330,6 @@ class _HomePageState extends State<HomePage> {
         context: context,
         builder: (_) => StatefulBuilder(
           builder: (context, setDialogState) {
-
             return AlertDialog(
               backgroundColor: AppColors.background,
               title: Text('Новая задача', style: AppText.title,),
@@ -418,9 +417,9 @@ class _HomePageState extends State<HomePage> {
                     ],),
                     SizedBox(height: 4,),
                     if (tasktimeMode == TaskTimeMode.deadline )
-                      DeadlineEditor()
+                      DeadlineEditor(setDialogState)
                     else if (tasktimeMode == TaskTimeMode.fixed)
-                      FixedtimeEditor()
+                      FixedtimeEditor(setDialogState)
                     else
                       NoneEditor()
                   ],
@@ -475,7 +474,7 @@ class _HomePageState extends State<HomePage> {
         )
     );
   }
-  Widget DeadlineEditor() {
+  Widget DeadlineEditor(StateSetter update) {
     return Column(children: [
       SizedBox(height: 20,),
       iosForTimeContainer(children: [Row(
@@ -493,7 +492,7 @@ class _HomePageState extends State<HomePage> {
           Container(
             width: 200,
               child: ListTile(
-                title : deadLineDate?.year == null
+                title : deadLineDate?.day == null
                     ? Text('Укажите дату', style: AppText.cardTtle.copyWith(color: Colors.grey.shade400,),)
                     : Text('${deadLineDate!.year}:${deadLineDate!.month}:${deadLineDate!.day}', style: AppText.cardTtle,),
                 onTap: () async {
@@ -508,12 +507,15 @@ class _HomePageState extends State<HomePage> {
                 );
                 if (date == null) return;
                 deadLineDate = date;
+                update(() {
+
+                });
               },))
         ],
       )],)
     ],);
   }
-  Widget FixedtimeEditor() {
+  Widget FixedtimeEditor(StateSetter update) {
     return Column(children: [
       SizedBox(height: 20,),
       iosForTimeContainer(children: [Row(
@@ -528,8 +530,10 @@ class _HomePageState extends State<HomePage> {
         children: [
           Text('Дата:', style: AppText.cardTtle,),
           Expanded(child: Container()),
-          Container(width: 100, child: ListTile(
-            title: Text(dateController.text),
+          Container(width: 200, child: ListTile(
+            title: fixedTimeDate?.day == null
+            ? Text('Укажите дату', style: AppText.cardTtle.copyWith(color: Colors.grey.shade400,),)
+            : Text('${fixedTimeDate!.year}:${fixedTimeDate!.month}:${fixedTimeDate!.day}', style: AppText.cardTtle,),
             onTap: () async {
               final DateTime? date = await showDatePicker(
                 context: context,
@@ -542,6 +546,7 @@ class _HomePageState extends State<HomePage> {
               );
               if (date == null) return;
               fixedTimeDate = date;
+              update(() {});
             },))
         ],
       )],)

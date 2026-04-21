@@ -41,7 +41,7 @@ class ScheduleController {
     task.isDone = !task.isDone;
 
   }
-  Future<void> init() async {
+  Future<void> init() async {/*
     final stored = await ScheduleStorageService.load();
 
     if (stored == null || !isSameDay(stored.generatedAt, DateTime.now())) {
@@ -50,7 +50,8 @@ class ScheduleController {
     }
     else {
       importSchedule(stored);
-    }
+    } */
+    generateSchedule();
   }
   void importSchedule(StoredSchedule storedSchedule) {
     timeline.clear();
@@ -80,23 +81,15 @@ class ScheduleController {
 
     final allTasks = spaces.expand((s) => s.tasks).where((t) => !t.isDone).toList();
 
-    final fixedTasks = allTasks
-        .where((t) => t.fixedStartTime != null)
-        .toList()
+    final fixedTasks = allTasks.where((t) => t.fixedStartTime != null).toList()
       ..sort((a, b) => a.fixedStartTime!.compareTo(b.fixedStartTime!));
 
-    final deadlineTasks = allTasks
-        .where((t) => t.deadLine != null && t.fixedStartTime == null)
-        .toList()
+    final deadlineTasks = allTasks.where((t) => t.deadLine != null && t.fixedStartTime == null).toList()
       ..sort((a, b) => a.deadLine!.compareTo(b.deadLine!));
 
-    final freeTasks = allTasks
-        .where((t) => t.deadLine == null && t.fixedStartTime == null)
-        .toList()
+    final freeTasks = allTasks.where((t) => t.deadLine == null && t.fixedStartTime == null).toList()
       ..sort((a, b) {
-        if (parameters.priorityMode && a.priority != b.priority) {
-          return a.priority.compareTo(b.priority);
-        }
+        if (parameters.priorityMode && a.priority != b.priority) {return a.priority.compareTo(b.priority);}
         return a.duration.compareTo(b.duration);
       });
 

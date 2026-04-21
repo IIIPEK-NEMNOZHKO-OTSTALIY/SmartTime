@@ -9,8 +9,10 @@ import '../widgets/scheduleCard.dart';
 
 class SchedulePage extends StatefulWidget {
   final List<Space> spaces;
+  final List<Space> allHomeSpaces;
   final ScheduleParameters parameters;
-  const SchedulePage({Key? key, required this.spaces, required this.parameters}) : super(key: key);
+
+  const SchedulePage({Key? key, required this.allHomeSpaces, required this.spaces, required this.parameters}) : super(key: key);
 
   @override
   State<SchedulePage> createState() => _SchedulePageState();
@@ -24,7 +26,7 @@ class _SchedulePageState extends State<SchedulePage> {
   void initState() {
     super.initState();
     _weekPageController = PageController(initialPage: 1000);
-    _controller = ScheduleController(spaces: widget.spaces, parameters: widget.parameters);
+    _controller = ScheduleController(spaces: widget.spaces, parameters: widget.parameters,);
     _controller.init();
     setState(() {});
   }
@@ -47,7 +49,7 @@ class _SchedulePageState extends State<SchedulePage> {
             centerTitle: true,
             title: Text('Расписание', style: AppText.title,),
             actions: [IconButton(icon: Icon(Icons.settings), onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleSetupPage(allSpaces: _controller.spaces)));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleSetupPage(allSpaces: widget.allHomeSpaces, savedParams: widget.parameters, isFirstTimeOpen: false,)));
               setState(() {});
             },)
             ]

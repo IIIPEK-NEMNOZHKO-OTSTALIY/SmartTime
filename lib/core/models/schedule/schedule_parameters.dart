@@ -3,6 +3,18 @@ enum DensityMode {
   balanced,
   dense,
 }
+extension DensityModeExtension on DensityMode {
+  String get label {
+    switch (this) {
+      case DensityMode.relaxed:
+        return 'Спокойный';
+      case DensityMode.balanced:
+        return 'Сбалансированный';
+      case DensityMode.dense:
+        return 'Плотный';
+    }
+  }
+}
 class ScheduleParameters {
   final int dayStartTime;
   final int dayEndTime;

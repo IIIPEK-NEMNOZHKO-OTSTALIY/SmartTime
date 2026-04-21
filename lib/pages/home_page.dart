@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smarttime2/core/models/schedule/schedule_parameters.dart';
 import 'package:smarttime2/core/models/schedule/schedule_storage.dart';
 import 'package:smarttime2/widgets/home%20page%20widgets/HeroTaskCard.dart';
 import 'package:smarttime2/widgets/home%20page%20widgets/taskCard.dart';
@@ -87,7 +88,7 @@ class _HomePageState extends State<HomePage> {
         ? HeroTaskCard(title: 'Похоже у вас нет ближайших задач!', subtitle: 'перейдите в расписание чтобы создать таковую', onDone: () {}, color: AppColors.card)
         : HeroTaskCard(title: heroTask!.title, subtitle: 'Начнется через 25 минут', onDone: () {}, color: _controller.spaces.firstWhere((s) => s.tasks.any((t) => t.id == heroTask!.taskId)).color),
         GoToScheduleButton(
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleSetupPage(allSpaces: _controller.spaces))),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ScheduleSetupPage(allSpaces: _controller.spaces, savedParams: ScheduleParameters(selectedSpacesIds: []),))),
         ),
         Padding(padding: EdgeInsets.all(16), child: Text('Мои пространства', style: AppText.title,)),
         SpaceAddButton(onTap: () => addSpaceDialog()),

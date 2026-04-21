@@ -10,7 +10,9 @@ import '../widgets/scheduleCard.dart';
 
 class ScheduleSetupPage extends StatefulWidget {
   final List<Space> allSpaces;
-  const ScheduleSetupPage({Key? key, required this.allSpaces}) : super(key: key);
+  ScheduleParameters savedParams;
+  bool isFirstTimeOpen;
+  ScheduleSetupPage({Key? key, required this.allSpaces, required this.savedParams, this.isFirstTimeOpen = true}) : super(key: key);
 
   @override
   State<ScheduleSetupPage> createState() => _SchedulePageState();
@@ -19,21 +21,34 @@ class ScheduleSetupPage extends StatefulWidget {
 class _SchedulePageState extends State<ScheduleSetupPage> {
   late final ScheduleSetupController _controller;
 
+  TextEditingController dayStartTimeController = TextEditingController();
+  TextEditingController dayEndTimeController = TextEditingController();
+  DensityMode densityMode = DensityMode.balanced;
+  bool priorityMode = true;
+  List<String> firstSelectedSpaces = [];
   @override
   void initState() {
     super.initState();
     _controller = ScheduleSetupController(allSpaces: widget.allSpaces);
+
+    if (widget.savedParams.dayStartTime != 9*60) {
+      dayStartTimeController = TextEditingController(text: widget.savedParams.dayStartTime.toString());
+      dayEndTimeController = TextEditingController(text: widget.savedParams.dayEndTime.toString());
+      densityMode = widget.savedParams.densityMode;
+      priorityMode = widget.savedParams.priorityMode;
+      _controller.selectedSpacesIds.clear();
+      _controller.selectedSpacesIds.addAll(widget.savedParams.selectedSpacesIds);
+      firstSelectedSpaces = widget.savedParams.selectedSpacesIds;
+      for (String i in firstSelectedSpaces) {
+        _controller.toggleSpace(i);
+      }
+    }
     setState(() {});
   }
 
-  TextEditingController dayStartTimeController = TextEditingController();
-  TextEditingController dayEndTimeController = TextEditingController();
-
-  bool priorityMode = true;
   @override
   Widget build(BuildContext context) {
 
-    DensityMode densityMode = DensityMode.balanced;
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
@@ -44,11 +59,15 @@ class _SchedulePageState extends State<ScheduleSetupPage> {
                 dayStartTime: int.parse(dayStartTimeController.text),
                 dayEndTime: int.parse(dayEndTimeController.text)
             );
-            Navigator.push(context, MaterialPageRoute(builder: (context) => SchedulePage(spaces: _controller.selectedSpaces, parameters: params)));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => SchedulePage(spaces: _controller.selectedSpaces, allHomeSpaces: widget.allSpaces, parameters: params)));
           },
-          backgroundColor: AppColors.buttonGradientColor,
+          backgroundColor: widget.isFirstTimeOpen == true
+          ? AppColors.buttonGradientColor
+          : Colors.red,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), ),
-          label: Text('Сохранить', style: TextStyle(color: AppColors.card, fontSize: 18),)
+          label: widget.isFirstTimeOpen == true
+          ? Text('Сохранить', style: TextStyle(color: AppColors.card, fontSize: 18),)
+          : Text('Пересоздать', style: TextStyle(color: AppColors.card, fontSize: 18),)
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       appBar: AppBar(
@@ -107,12 +126,12 @@ class _SchedulePageState extends State<ScheduleSetupPage> {
               [
               Row(
                 children: [
-                  Text('Перерывы', style: AppText.cardTtle,),
+                  Text('День', style: AppText.cardTtle,),
                   Expanded(child: SizedBox()),
                   DropdownButton<DensityMode>(
                     value: densityMode,
                     items: DensityMode.values.map((mode) {
-                      return DropdownMenuItem(value: mode, child: Text(mode.name, style: AppText.cardTtle,));
+                      return DropdownMenuItem(value: mode, child: Text(mode.label, style: AppText.cardTtle,));
                     }).toList(),
                     dropdownColor: AppColors.card,
                     barrierDismissible: true,
